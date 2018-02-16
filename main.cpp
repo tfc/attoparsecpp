@@ -66,9 +66,8 @@ static auto many(P p) {
     return [p] (str_pos pos) -> parser<std::string> {
         std::string ss;
         while (auto ret {p(pos)}) {
-            auto [c, newpos] = *ret;
-            ss.push_back(c);
-            pos = newpos;
+            ss.push_back(ret->first);
+            pos = ret->second;
         }
         return {{std::string{std::cbegin(ss), std::cend(ss)}, pos}};
     };
@@ -94,8 +93,7 @@ static auto token(P parser) {
         if (auto ret {parser(p)}) {
             auto [c, newpos] = *ret;
             if (auto ret2 {many(oneOf(' ', '\t'))(newpos)}) {
-                auto [cc, newnewpos] = *ret2;
-                return {{c, newnewpos}};
+                return {{c, ret2->second}};
             }
         }
         return {};
@@ -109,17 +107,17 @@ static auto parse(P &&p, const std::string &s)
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream &os, const std::vector<T> &v)
+static std::ostream& operator<<(std::ostream &os, const std::vector<T> &v)
 {
-    os << "[";
+    os << '[';
     for (const auto &i : v) { os << i << ", "; }
-    return os << "]\n";
+    return os << ']';
 }
 
 int main(int argc, char **argv)
 {
     if (argc != 2) {
-        std::cout << "foo\n";
+        std::cout << "plz provide a string as parameter\n";
         return 1;
     }
 
@@ -127,4 +125,5 @@ int main(int argc, char **argv)
 
     std::cout << input << '\n';
     std::cout << parse(manyV(token(number())), input) << '\n';
+    std::cout << parse(many(noneOf(' ')), input) << '\n';
 }
