@@ -30,8 +30,11 @@ std::ostream& operator<<(std::ostream& os, const str_pos &p)
 template <typename T>
 using parser = std::optional<std::pair<T, str_pos>>;
 
-template <typename T>
-using parser_payload_type = decltype(std::declval<T>()(str_pos::from_str(""))->first);
+template <typename P>
+using parser_ret = decltype(std::declval<P>()(str_pos::from_str("")));
+
+template <typename P>
+using parser_payload_type = decltype(std::declval<P>()(str_pos::from_str(""))->first);
 
 template <typename F>
 static auto not_at_end(F f)
@@ -43,7 +46,6 @@ static auto not_at_end(F f)
         return f(p);
     };
 }
-
 
 static auto anyChar() {
     return not_at_end([] (str_pos p) -> parser<char> {
@@ -81,15 +83,21 @@ static auto oneOf(Cs ... cs) {
 }
 
 template <typename P>
-static auto many(P p) {
-    return [p] (str_pos pos) -> parser<std::string> {
+static auto many(P p, bool minimum_one = false) {
+    return [p, minimum_one] (str_pos pos) -> parser<std::string> {
         std::string ss;
         while (auto ret {p(pos)}) {
             ss.push_back(ret->first);
             pos = ret->second;
         }
+        if (minimum_one && ss.empty()) { return {}; }
         return {{std::string{std::cbegin(ss), std::cend(ss)}, pos}};
     };
+}
+
+template <typename P>
+static auto many1(P p) {
+    return many(p, true);
 }
 
 template <typename P>
@@ -108,7 +116,7 @@ static auto manyV(P p) {
 
 static auto integer() {
     return [] (str_pos p) -> parser<int> {
-        if (auto ret = many(number())(p)) {
+        if (auto ret = many1(number())(p)) {
             std::istringstream ss {ret->first};
             int i;
             ss >> i;
@@ -155,6 +163,47 @@ static auto chainl1(P1 item_parser, P2 op_parser)
             op = op_parser(b->second);
         }
         return {{accum, pos}};
+    };
+}
+
+template <typename P1, typename P2>
+static auto prefixed(P1 prefix_parser, P2 parser)
+{
+    return [prefix_parser, parser] (str_pos pos) -> parser_ret<P2> {
+        if (auto ret1 {prefix_parser(pos)}) {
+            return parser(ret1->second);
+        }
+        return {};
+    };
+}
+
+template <typename P1, typename P2>
+static auto postfixed(P1 suffix_parser, P2 parser)
+{
+    return [suffix_parser, parser] (str_pos pos) -> parser_ret<P2> {
+        if (auto ret1 {parser(pos)}) {
+            if (auto ret2 {suffix_parser(ret1->second)}) {
+                return {{ret1->first, ret2->second}};
+            }
+        }
+        return {};
+    };
+}
+
+template <typename P1, typename P2, typename P3>
+static auto clasped(P1 open_parser, P2 close_parser, P3 parser)
+{
+    return postfixed(close_parser, prefixed(open_parser, parser));
+}
+
+template <typename P1, typename P2>
+static auto choice(P1 p1, P2 p2)
+{
+    return [p1, p2] (str_pos pos) {
+        if (auto ret1 {p1(pos)}) {
+            return ret1;
+        }
+        return p2(pos);
     };
 }
 
