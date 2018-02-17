@@ -1,5 +1,6 @@
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 using str_it = std::string::const_iterator;
@@ -29,13 +30,25 @@ std::ostream& operator<<(std::ostream& os, const str_pos &p)
 template <typename T>
 using parser = std::optional<std::pair<T, str_pos>>;
 
-static auto anyChar() {
-    return [] (str_pos p) -> parser<char> {
+template <typename T>
+using parser_payload_type = decltype(std::declval<T>()(str_pos::from_str(""))->first);
+
+template <typename F>
+static auto not_at_end(F f)
+{
+    return [f] (str_pos p) -> parser<parser_payload_type<F>> {
         if (p.at_end()) {
             return {};
         }
-        return {{static_cast<char>(*p), p.advance()}};
+        return f(p);
     };
+}
+
+
+static auto anyChar() {
+    return not_at_end([] (str_pos p) -> parser<char> {
+        return {{static_cast<char>(*p), p.advance()}};
+    });
 }
 
 static auto number() {
@@ -81,7 +94,7 @@ static auto many(P p) {
 
 template <typename P>
 static auto manyV(P p) {
-    using T = decltype(p(str_pos::from_str(""))->first);
+    using T = parser_payload_type<P>;
     return [p] (str_pos pos) -> parser<std::vector<T>> {
         std::vector<T> v;
         while (auto ret {p(pos)}) {
@@ -122,7 +135,7 @@ static auto token(P parser) {
 template <typename P1, typename P2>
 static auto chainl1(P1 item_parser, P2 op_parser)
 {
-    using T = decltype(item_parser(str_pos::from_str(""))->first);
+    using T = parser_payload_type<P1>;
     return [item_parser, op_parser] (str_pos p) -> parser<T> {
         auto i {item_parser(p)};
         if (!i) { return {}; }
