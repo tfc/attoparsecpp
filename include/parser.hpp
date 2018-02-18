@@ -28,7 +28,7 @@ struct str_pos : public std::pair<str_it, str_it> {
     bool at_end() const { return size() == 0; }
 };
 
-std::ostream& operator<<(std::ostream& os, const str_pos &p)
+static std::ostream& operator<<(std::ostream& os, const str_pos &p)
 {
     os << "(";
     std::copy(p.first, p.second, std::ostream_iterator<char>{os});

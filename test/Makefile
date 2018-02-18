@@ -11,8 +11,11 @@ main.o: main.cpp catch.hpp
 test.o: test.cpp ../include/parser.hpp catch.hpp
 	$(CC) $(CXXFLAGS) -I../include -c test.cpp
 
-main: main.o test.o
-	$(CC) -o main main.o test.o
+math_expression.o: math_expression.cpp ../include/parser.hpp catch.hpp
+	$(CC) $(CXXFLAGS) -I../include -c math_expression.cpp
+
+main: main.o test.o math_expression.o
+	$(CC) -o main main.o test.o math_expression.o
 
 clean:
 	rm -r main main.o test.o
