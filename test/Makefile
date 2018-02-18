@@ -18,4 +18,4 @@ main: main.o test.o math_expression.o
 	$(CC) -o main main.o test.o math_expression.o
 
 clean:
-	rm -r main main.o test.o
+	rm -r main *.o

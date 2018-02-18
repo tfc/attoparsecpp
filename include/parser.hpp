@@ -1,6 +1,9 @@
+#include <iterator>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <utility>
+
 #include <vector>
 
 using str_it = std::string::const_iterator;
