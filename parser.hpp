@@ -47,39 +47,39 @@ static auto not_at_end(F f)
     };
 }
 
-static auto anyChar() {
+static parser<char> anyChar(str_pos pos) {
     return not_at_end([] (str_pos p) -> parser<char> {
         return {{static_cast<char>(*p), p.advance()}};
-    });
+    })(pos);
 }
 
-static auto number() {
-    return [] (str_pos p) -> parser<char> {
-        if (p.at_end() || !('0' <= *p && *p <= '9')) {
+static parser<char> number(str_pos pos) {
+    return not_at_end([] (str_pos p) -> parser<char> {
+        if (!('0' <= *p && *p <= '9')) {
             return {};
         }
         return {{static_cast<char>(*p), p.advance()}};
-    };
+    })(pos);
 }
 
 template <typename ... Cs>
 static auto noneOf(Cs ... cs) {
-    return [=] (str_pos p) -> parser<char> {
-        if (p.at_end() || ((*p == cs) || ...)) {
-            return {};
+    return not_at_end([=] (str_pos p) -> parser<char> {
+        if (((*p != cs) && ...)) {
+            return {{*p, p.advance()}};
         }
-        return {{*p, p.advance()}};
-    };
+        return {};
+    });
 }
 
 template <typename ... Cs>
 static auto oneOf(Cs ... cs) {
-    return [=] (str_pos p) -> parser<char> {
-        if (p.at_end() || !((*p == cs) || ...)) {
-            return {};
+    return not_at_end([=] (str_pos p) -> parser<char> {
+        if (((*p == cs) || ...)) {
+            return {{*p, p.advance()}};
         }
-        return {{*p, p.advance()}};
-    };
+        return {};
+    });
 }
 
 template <typename P>
@@ -114,22 +114,19 @@ static auto manyV(P p) {
     };
 }
 
-static auto integer() {
-    return [] (str_pos p) -> parser<int> {
-        if (auto ret = many1(number())(p)) {
-            std::istringstream ss {ret->first};
-            int i;
-            ss >> i;
-            return {{i, ret->second}};
-        }
-        return {};
-    };
+static parser<int> integer(str_pos p) {
+    if (auto ret = many1(number)(p)) {
+        std::istringstream ss {ret->first};
+        int i;
+        ss >> i;
+        return {{i, ret->second}};
+    }
+    return {};
 }
 
 template <typename P>
 static auto token(P parser) {
-    return [parser] (str_pos p) -> decltype(parser(str_pos::from_str(""))) {
-        if (p.at_end()) { return {}; }
+    return not_at_end([parser] (str_pos p) -> decltype(parser(str_pos::from_str(""))) {
         if (auto ret {parser(p)}) {
             auto [c, newpos] = *ret;
             if (auto ret2 {many(oneOf(' ', '\t'))(newpos)}) {
@@ -137,7 +134,7 @@ static auto token(P parser) {
             }
         }
         return {};
-    };
+    });
 }
 
 template <typename P1, typename P2>
