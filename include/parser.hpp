@@ -10,14 +10,22 @@ struct str_pos : public std::pair<str_it, str_it> {
         return {std::pair{std::cbegin(s), std::cend(s)}};
     }
 
-    char operator*() const { return *(this->first); }
-
-    str_pos& advance(size_t i = 1) {
-        ++this->first;
-        return *this;
+    std::optional<char> peek() const {
+        if (!at_end()) { return {*(this->first)}; }
+        return {};
     }
 
-    bool at_end() const { return this->first == this->second; }
+    char operator*() const { return *(this->first); }
+
+    str_pos next() const {
+        auto r {*this};
+        ++(r.first);
+        return r;
+    }
+
+    size_t size() const { return this->second - this->first; }
+
+    bool at_end() const { return size() == 0; }
 };
 
 std::ostream& operator<<(std::ostream& os, const str_pos &p)
@@ -40,46 +48,37 @@ template <typename F>
 static auto not_at_end(F f)
 {
     return [f] (str_pos p) -> parser<parser_payload_type<F>> {
-        if (p.at_end()) {
-            return {};
-        }
+        if (p.at_end()) { return {}; }
         return f(p);
     };
 }
 
 static parser<char> anyChar(str_pos pos) {
     return not_at_end([] (str_pos p) -> parser<char> {
-        return {{static_cast<char>(*p), p.advance()}};
+        return {{*p, p.next()}};
     })(pos);
 }
 
+template <typename F>
+static auto sat(F predicate) {
+    return not_at_end([predicate] (str_pos p) -> parser<char> {
+        if (predicate(*p)) { return {{*p, p.next() }}; }
+        return {};
+    });
+}
+
 static parser<char> number(str_pos pos) {
-    return not_at_end([] (str_pos p) -> parser<char> {
-        if (!('0' <= *p && *p <= '9')) {
-            return {};
-        }
-        return {{static_cast<char>(*p), p.advance()}};
-    })(pos);
+    return sat([](char c) { return '0' <= c && c <= '9'; })(pos);
 }
 
 template <typename ... Cs>
 static auto noneOf(Cs ... cs) {
-    return not_at_end([=] (str_pos p) -> parser<char> {
-        if (((*p != cs) && ...)) {
-            return {{*p, p.advance()}};
-        }
-        return {};
-    });
+    return sat([cs...] (char c) { return ((c != cs) && ...); });
 }
 
 template <typename ... Cs>
 static auto oneOf(Cs ... cs) {
-    return not_at_end([=] (str_pos p) -> parser<char> {
-        if (((*p == cs) || ...)) {
-            return {{*p, p.advance()}};
-        }
-        return {};
-    });
+    return sat([cs...] (char c) { return ((c == cs) || ...); });
 }
 
 template <typename P>
@@ -205,7 +204,16 @@ static auto choice(P1 p1, P2 p2)
 }
 
 template <typename P>
-static auto parse(P &&p, const std::string &s)
+static auto run_parser(P &&p, const std::string &s)
 {
-    return p(str_pos::from_str(s))->first;
+    return p(str_pos::from_str(s));
+}
+
+template <typename P>
+static std::optional<parser_payload_type<P>> parse(P &&p, const std::string &s)
+{
+    if (auto ret {run_parser(p, s)}) {
+        return {ret->first};
+    }
+    return {};
 }
