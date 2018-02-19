@@ -12,8 +12,8 @@ BENCHMARK("vector<int> of 10 items", [](benchpress::context* ctx) {
     const std::string s {"1 2 3 4 5 6 7 8 9 10"};
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        auto r {run_parser(p, s)};
-        benchpress::escape(r->first.data());
+        auto r {parse_result(p, s)};
+        benchpress::escape(r->data());
     }
 })
 
@@ -33,8 +33,8 @@ BENCHMARK("vector<int> of 100 items", [](benchpress::context* ctx) {
     };
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        auto r {run_parser(p, s)};
-        benchpress::escape(r->first.data());
+        auto r {parse_result(p, s)};
+        benchpress::escape(r->data());
     }
 })
 
@@ -153,8 +153,8 @@ BENCHMARK("vector<int> of 1000 items", [](benchpress::context* ctx) {
     };
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        auto r {run_parser(p, s)};
-        benchpress::escape(r->first.data());
+        auto r {parse_result(p, s)};
+        benchpress::escape(r->data());
     }
 })
 
@@ -162,8 +162,8 @@ BENCHMARK("sum of 10 ints", [](benchpress::context* ctx) {
     const std::string s {"1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10"};
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        const auto r {run_parser(expr, s)};
-        assert(r->first == 55);
+        const auto r {parse_result(expr, s)};
+        assert(r == 55);
     }
 })
 
@@ -182,8 +182,8 @@ BENCHMARK("sum of 100 ints", [](benchpress::context* ctx) {
     };
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        const auto r {run_parser(expr, s)};
-        assert(r->first == 550);
+        const auto r {parse_result(expr, s)};
+        assert(r == 550);
     }
 })
 
@@ -301,8 +301,8 @@ BENCHMARK("sum of 1000 ints", [](benchpress::context* ctx) {
     };
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        const auto r {run_parser(expr, s)};
-        assert(r->first == 5500);
+        const auto r {parse_result(expr, s)};
+        assert(r == 5500);
     }
 })
 
@@ -310,8 +310,8 @@ BENCHMARK("product of 10 ints", [](benchpress::context* ctx) {
     const std::string s {"1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1"};
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        const auto r {run_parser(expr, s)};
-        assert(r->first == 1);
+        const auto r {parse_result(expr, s)};
+        assert(r == 1);
     }
 })
 
@@ -330,8 +330,8 @@ BENCHMARK("product of 100 ints", [](benchpress::context* ctx) {
     };
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        const auto r {run_parser(expr, s)};
-        assert(r->first == 1);
+        const auto r {parse_result(expr, s)};
+        assert(r == 1);
     }
 })
 
@@ -449,7 +449,7 @@ BENCHMARK("product of 1000 ints", [](benchpress::context* ctx) {
     };
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
-        const auto r {run_parser(expr, s)};
-        assert(r->first == 1);
+        const auto r {parse_result(expr, s)};
+        assert(r == 1);
     }
 })

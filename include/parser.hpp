@@ -215,7 +215,7 @@ static auto run_parser(P &&p, const std::string &s)
 }
 
 template <typename P>
-static std::optional<parser_payload_type<P>> parse(P &&p, const std::string &s)
+static std::optional<parser_payload_type<P>> parse_result(P &&p, const std::string &s)
 {
     if (auto ret {run_parser(p, s)}) {
         return {ret->first};
