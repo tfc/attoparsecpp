@@ -40,20 +40,14 @@ static parser<int> term(  str_pos p);
 static parser<int> factor(str_pos p);
 
 static parser<int> expr(str_pos p) {
-    return [] (str_pos pos) {
-        return chainl1(token(term), token(add_op))(pos);
-    }(p);
+    return chainl1(token(term), token(add_op))(p);
 };
 
 static parser<int> term(str_pos p) {
-    return [] (str_pos pos) {
-        return chainl1(token(factor), token(mul_op))(pos);
-    }(p);
+    return chainl1(token(factor), token(mul_op))(p);
 };
 
 static parser<int> factor(str_pos p) {
-    return [] (str_pos pos) {
-        return choice(integer, clasped(oneOf('('), oneOf(')'), expr))(pos);
-    }(p);
+    return choice(integer, clasped(oneOf('('), oneOf(')'), expr))(p);
 }
 
