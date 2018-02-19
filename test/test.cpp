@@ -143,7 +143,8 @@ SCENARIO( "manyV parser combinations" ) {
             REQUIRE( r->second.at_end() );
         }
         WHEN( "given string \"1 2 3ABC\"" ) {
-            const auto r {run_parser(p, "1 2 3ABC")};
+            const std::string s {"1 2 3ABC"};
+            const auto r {run_parser(p, s)};
             REQUIRE( r.has_value() );
             REQUIRE( r->first == vect_t{1, 2, 3} );
             REQUIRE_FALSE( r->second.at_end() );
