@@ -60,10 +60,7 @@ In order to write a little calculator tool from it, the only code left to be imp
 
 ``` c++
 std::optional<int> evalutate_math_expression(std::string input) {
-    if (const auto result {run_parser(expr, input)}) {
-        return {result->first};
-    }
-    return {};
+    return parse_result(expr, input);
 }
 
 // evaluate_math_expression("1 + 2 * (3 + 2)")
