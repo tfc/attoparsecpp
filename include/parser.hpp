@@ -156,7 +156,7 @@ static auto chainl1(P1 item_parser, P2 op_parser)
 
         while (op) {
             auto b {item_parser(op->second)};
-            if (!b) { return {{accum, op->second}}; }
+            if (!b) { return {{accum, pos}}; }
 
             accum = op->first(accum, b->first);
 
