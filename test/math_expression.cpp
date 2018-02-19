@@ -115,4 +115,27 @@ SCENARIO( "math expression parser", "[math_expression_parser]" ) {
             REQUIRE( r->first == 157 );
         }
     }
+    GIVEN( "Trailing operations" ) {
+        WHEN( "string with single int and trailing +" ) {
+            const std::string str {"123 +"};
+            const auto r {run_parser(expr, str)};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == 123 );
+            REQUIRE( r->second.peek() == '+' );
+        }
+        WHEN( "string with 2 ints and trailing +" ) {
+            const std::string str {"123 - 0 +"};
+            const auto r {run_parser(expr, str)};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == 123 );
+            REQUIRE( r->second.peek() == '+' );
+        }
+        WHEN( "mixed expression with trailing +" ) {
+            const std::string str {"1 + (2 * (4 + 3) + 12 * 12 - (6 / 3)) +"};
+            const auto r {run_parser(expr, str)};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == 157 );
+            REQUIRE( r->second.peek() == '+' );
+        }
+    }
 }
