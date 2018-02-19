@@ -1,3 +1,4 @@
 main
 test/catch.hpp
+benchmark/benchpress/
 *.o
