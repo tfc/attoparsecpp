@@ -105,10 +105,11 @@ static auto many1(P p) {
 }
 
 template <typename P>
-static auto manyV(P p) {
+static auto manyV(P p, size_t reserve_items = 0) {
     using T = parser_payload_type<P>;
-    return [p] (str_pos pos) -> parser<std::vector<T>> {
+    return [p, reserve_items] (str_pos pos) -> parser<std::vector<T>> {
         std::vector<T> v;
+        v.reserve(reserve_items);
         while (auto ret {p(pos)}) {
             auto [c, newpos] = *ret;
             v.push_back(c);
