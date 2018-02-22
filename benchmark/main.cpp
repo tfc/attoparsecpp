@@ -12,6 +12,22 @@ std::string self_concat(const char *s, size_t times) {
     return ss.str();
 }
 
+static void measure_word_parsing(size_t size, benchpress::context* ctx) {
+    const auto p {many(noneOf(' '))};
+    const std::string s {self_concat("a", size)};
+
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+        auto r {parse_result(p, s)};
+        benchpress::escape(r->data());
+    }
+}
+
+BENCHMARK("parse word of    10 chars", [](benchpress::context* ctx) { measure_word_parsing(10, ctx); })
+BENCHMARK("parse word of   100 chars", [](benchpress::context* ctx) { measure_word_parsing(100, ctx); })
+BENCHMARK("parse word of  1000 chars", [](benchpress::context* ctx) { measure_word_parsing(1000, ctx); })
+BENCHMARK("parse word of 10000 chars", [](benchpress::context* ctx) { measure_word_parsing(10000, ctx); })
+
+
 static void measure_vector_filling(size_t size, benchpress::context* ctx) {
     const auto p {manyV(token(integer), size)};
     const std::string s {self_concat("1 ", size)};
