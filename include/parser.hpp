@@ -119,13 +119,16 @@ static auto manyV(P p) {
 }
 
 static parser<int> integer(str_pos p) {
-    if (auto ret = many1(number)(p)) {
-        std::istringstream ss {ret->first};
-        int i;
-        ss >> i;
-        return {{i, ret->second}};
+    int accum = 0;
+    str_pos cursor {p};
+    while (auto ret = number(cursor)) {
+        accum = 10 * accum + ret->first - '0';
+        cursor = ret->second;
     }
-    return {};
+    if (p.first == cursor.first) {
+        return {};
+    }
+    return {{accum, cursor}};
 }
 
 template <typename P>
