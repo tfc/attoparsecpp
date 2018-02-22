@@ -70,9 +70,32 @@ std::optional<int> evalutate_math_expression(std::string input) {
 `run_parser` returns a tuple that contains the result of successful parsing in the first field and the rest of the not consumed part of the string in the second field.
 The whole tuple is wrapped into an `std::optional` which enables the parser lib to indicate failure.
 
-## Optimizations
+## Performance
 
-As this code partly relies on C++17 already (actually only because of the fold-expression implementation of `oneOf` and `noneOf`), it could/should also use `std::string_view` instead of the handcrafted `str_pos` type.
+Benchmark output on a Macbook Pro late 2013
 
-The output type of the `many` parser combinator could also use `std::string_view`.
+- 22 nm "Haswell/Crystalwell" 2.6 GHz Intel "Core i7" processor (4960HQ)
+- 256 KB L2, 6 MB L3 Cache
+- 16 GB 1600 MHz DDR3L SDRAM
+
+``` bash
+parse word of    10 chars              20000000          55 ns/op
+parse word of   100 chars               1000000        1084 ns/op
+parse word of  1000 chars                200000        5541 ns/op
+parse word of 10000 chars                 50000       48410 ns/op
+vector<int> of    10 items              5000000         321 ns/op
+vector<int> of   100 items              1000000        1238 ns/op
+vector<int> of  1000 items               200000       10125 ns/op
+vector<int> of 10000 items                20000       97389 ns/op
+sum of    10 ints                       5000000         275 ns/op
+sum of   100 ints                        500000        2680 ns/op
+sum of  1000 ints                         50000       26113 ns/op
+sum of 10000 ints                          5000      260483 ns/op
+product of    10 ints                  10000000         181 ns/op
+product of   100 ints                   1000000        1662 ns/op
+product of  1000 ints                    100000       16364 ns/op
+product of 10000 ints                     10000      163884 ns/op
+```
+
+
 
