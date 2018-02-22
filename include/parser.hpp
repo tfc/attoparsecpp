@@ -89,13 +89,13 @@ static auto oneOf(Cs ... cs) {
 template <typename Parser>
 static auto many(Parser p, bool minimum_one = false) {
     return [p, minimum_one] (str_pos pos) -> parser<std::string> {
-        std::string ss;
+        std::string s;
         while (auto ret {p(pos)}) {
-            ss.push_back(ret->first);
+            s.push_back(ret->first);
             pos = ret->second;
         }
-        if (minimum_one && ss.empty()) { return {}; }
-        return {{std::string{std::cbegin(ss), std::cend(ss)}, pos}};
+        if (minimum_one && s.empty()) { return {}; }
+        return {{std::move(s), pos}};
     };
 }
 
@@ -115,7 +115,7 @@ static auto manyV(Parser p, size_t reserve_items = 0) {
             v.push_back(c);
             pos = newpos;
         }
-        return {{v, pos}};
+        return {{std::move(v), pos}};
     };
 }
 
