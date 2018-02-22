@@ -12,7 +12,7 @@ benchpress/cxxopts.hpp:
 
 CXXFLAGS=-O2 -std=c++1z
 
-main: main.cpp benchpress/benchpress.hpp benchpress/cxxopts.hpp
+main: main.cpp benchpress/benchpress.hpp benchpress/cxxopts.hpp ../include/parser.hpp ../include/math_expression.hpp
 	$(CC) $(CXXFLAGS) -I../include main.cpp -o main
 
 clean:
