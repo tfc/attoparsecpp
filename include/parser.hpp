@@ -4,6 +4,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include <vector>
@@ -162,6 +163,33 @@ static auto sep_by(TParser item_parser, SepParser sep_parser, size_t reserve_ite
         }
         return {{std::move(v), pos}};
     };
+}
+
+template <typename Parser>
+static parser<std::tuple<parser_payload_type<Parser>>>
+apply_parsers(str_pos pos, const Parser &parser) {
+    if (auto ret {parser(pos)}) {
+        return {{std::make_tuple(std::move(ret->first)), ret->second}};
+    }
+    return {};
+}
+
+template <typename Parser, typename ... Parsers>
+static parser<std::tuple<parser_payload_type<Parser>, parser_payload_type<Parsers> ...>>
+apply_parsers(str_pos pos, const Parser &parser, const Parsers& ... rest_parsers) {
+    if (auto ret {parser(pos)}) {
+        if (auto ret_rest {apply_parsers(ret->second, rest_parsers...)}) {
+            return {{std::tuple_cat(std::make_tuple(std::move(ret->first)),
+                                    std::move(ret_rest->first)),
+                     ret_rest->second}};
+        }
+    }
+    return {};
+}
+
+template <typename ... Parsers>
+static auto tuple_of(Parsers ... parsers) {
+    return [parsers...] (str_pos pos) { return apply_parsers(pos, parsers...); };
 }
 
 template <typename Parser1, typename Parser2>

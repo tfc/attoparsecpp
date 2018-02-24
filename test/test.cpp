@@ -264,3 +264,40 @@ SCENARIO( "sep_by parsers", "[parser]" ) {
     }
 }
 
+
+SCENARIO( "tuple_of parsers", "[parser]" ) {
+    GIVEN( "tuple of int, int" ) {
+        const auto whitespace {many(oneOf(' ', '\t'))};
+        const auto comma_whitespace {prefixed(oneOf(','), whitespace)};
+        const auto p {tuple_of(integer, prefixed(comma_whitespace, integer))};
+        WHEN( "given an empty string" ) {
+            const auto r {run_parser(p, "")};
+            REQUIRE( !r.has_value() );
+        }
+        WHEN( "given valid string" ) {
+            const auto r {run_parser(p, "123, 456")};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == std::make_tuple(123, 456) );
+        }
+    }
+    GIVEN( "tuple of int, alphaword, vector int" ) {
+        const auto whitespace {many(oneOf(' ', '\t'))};
+        const auto comma_whitespace {prefixed(oneOf(','), whitespace)};
+        const auto alphaword {many(sat([] (char c) { return 'a' <= c && c <= 'z'; }), true)};
+        const auto p {tuple_of(integer,
+                               prefixed(comma_whitespace, alphaword),
+                               prefixed(comma_whitespace, sep_by(integer, comma_whitespace))
+                               )};
+        WHEN( "given an empty string" ) {
+            const auto r {run_parser(p, "")};
+            REQUIRE( !r.has_value() );
+        }
+        WHEN( "given valid string" ) {
+            const auto r {run_parser(p, "123, abc, 100, 200, 300")};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == std::make_tuple(123, std::string{"abc"}, std::vector<int>{100, 200, 300}) );
+        }
+    }
+}
+
+
