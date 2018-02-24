@@ -235,3 +235,32 @@ SCENARIO( "prefix/postfix parser", "[parser]" ) {
         }
     }
 }
+
+SCENARIO( "sep_by parsers", "[parser]" ) {
+    GIVEN( "sep_by int comma" ) {
+        const auto whitespace {many(oneOf(' ', '\t'))};
+        const auto comma_whitespace {prefixed(oneOf(','), whitespace)};
+        const auto p {sep_by(integer, comma_whitespace)};
+        WHEN( "given an empty string" ) {
+            const auto r {run_parser(p, "")};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == std::vector<int>{} );
+        }
+        WHEN( "given single item" ) {
+            const auto r {run_parser(p, "1")};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == std::vector<int>{1} );
+        }
+        WHEN( "given multiple items without spaces" ) {
+            const auto r {run_parser(p, "1,2,3,4")};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == std::vector<int>{1, 2, 3, 4} );
+        }
+        WHEN( "given multiple items with spaces" ) {
+            const auto r {run_parser(p, "1, 2,  3,   4,\t  5")};
+            REQUIRE( r.has_value() );
+            REQUIRE( r->first == std::vector<int>{1, 2, 3, 4, 5} );
+        }
+    }
+}
+

@@ -145,6 +145,26 @@ static auto token(Parser parser) {
     });
 }
 
+template <typename TParser, typename SepParser,
+          typename T = parser_payload_type<TParser>>
+static auto sep_by(TParser item_parser, SepParser sep_parser, size_t reserve_items = 0) {
+    return [item_parser, sep_parser, reserve_items] (str_pos pos) -> parser<std::vector<T>> {
+        std::vector<T> v;
+        v.reserve(reserve_items);
+        while (auto ret {item_parser(pos)}) {
+            auto [c, newpos] = *ret;
+            v.emplace_back(std::move(c));
+            auto sep_ret {sep_parser(newpos)};
+            if (!sep_ret) {
+                pos = newpos;
+                break;
+            }
+            pos = sep_ret->second;
+        }
+        return {{std::move(v), pos}};
+    };
+}
+
 template <typename Parser1, typename Parser2>
 static auto chainl1(Parser1 item_parser, Parser2 op_parser)
 {
