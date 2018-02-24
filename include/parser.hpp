@@ -45,10 +45,10 @@ template <typename T>
 using parser = std::optional<std::pair<T, str_pos>>;
 
 template <typename Parser>
-using parser_ret = decltype(std::declval<Parser>()(str_pos::from_str("")));
+using parser_ret = typename std::result_of<Parser(str_pos)>::type;
 
 template <typename Parser>
-using parser_payload_type = decltype(std::declval<Parser>()(str_pos::from_str(""))->first);
+using parser_payload_type = typename parser_ret<Parser>::value_type::first_type;
 
 template <typename F>
 static auto not_at_end(F f)
