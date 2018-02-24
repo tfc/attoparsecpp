@@ -104,9 +104,8 @@ static auto many1(Parser p) {
     return many(p, true);
 }
 
-template <typename Parser>
+template <typename Parser, typename T = parser_payload_type<Parser>>
 static auto manyV(Parser p, size_t reserve_items = 0) {
-    using T = parser_payload_type<Parser>;
     return [p, reserve_items] (str_pos pos) -> parser<std::vector<T>> {
         std::vector<T> v;
         v.reserve(reserve_items);
