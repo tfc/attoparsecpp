@@ -147,8 +147,9 @@ static auto token(Parser parser) {
 
 template <typename TParser, typename SepParser,
           typename T = parser_payload_type<TParser>>
-static auto sep_by(TParser item_parser, SepParser sep_parser, size_t reserve_items = 0) {
-    return [item_parser, sep_parser, reserve_items] (str_pos pos) -> parser<std::vector<T>> {
+static auto sep_by(TParser item_parser, SepParser sep_parser, bool minimum_one = false, size_t reserve_items = 0) {
+    return [item_parser, sep_parser, minimum_one, reserve_items]
+        (str_pos pos) -> parser<std::vector<T>> {
         std::vector<T> v;
         v.reserve(reserve_items);
         while (auto ret {item_parser(pos)}) {
@@ -161,6 +162,7 @@ static auto sep_by(TParser item_parser, SepParser sep_parser, size_t reserve_ite
             }
             pos = sep_ret->second;
         }
+        if (minimum_one && v.empty()) { return {}; }
         return {{std::move(v), pos}};
     };
 }
