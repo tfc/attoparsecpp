@@ -8,6 +8,8 @@
 
 #include "catch.hpp"
 
+using namespace apl;
+
 SCENARIO( "Fundamental parsers", "[parser]" ) {
     GIVEN( "anyChar" ) {
         WHEN( "given an empty string" ) {

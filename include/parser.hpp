@@ -7,13 +7,19 @@
 #include <utility>
 #include <vector>
 
+namespace std {
+    using namespace std::experimental;
+}
+
+namespace apl {
+
 using str_it = std::string::const_iterator;
 
 struct str_pos : public std::pair<str_it, str_it> {
     str_pos(const std::pair<str_it, str_it> &p) : std::pair<str_it, str_it>{p} {}
 
     static str_pos from_str(const std::string &s) {
-        return {std::pair{std::cbegin(s), std::cend(s)}};
+        return {std::pair<str_it, str_it>{std::cbegin(s), std::cend(s)}};
     }
 
     std::optional<char> peek() const {
@@ -301,4 +307,6 @@ static std::optional<parser_payload_type<Parser>> parse_result(Parser &&p, const
         return {ret->first};
     }
     return {};
+}
+
 }

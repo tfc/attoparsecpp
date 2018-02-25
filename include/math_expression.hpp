@@ -3,7 +3,8 @@
 #include <parser.hpp>
 
 /*
- * Following BNF Grammar:
+ * Following BNF Grammar from "functional pearls - monadic parsing in haskell"
+ * paper: http://www.cs.nott.ac.uk/~pszgmh/pearl.pdf
  *
  * expr = term   `chainl1` add_op
  * term = factor `chainl1` mul_op
@@ -12,6 +13,8 @@
  * add_op = (char '+' *> pure (+)) <|> (char '-' *> pure (-))
  * mul_op = (char '*' *> pure (*)) <|> (char '/' *> pure (/))
  */
+
+namespace apl {
 
 static parser<int(*)(int, int)> add_op(str_pos p)
 {
@@ -51,3 +54,4 @@ static parser<int> factor(str_pos p) {
     return choice(integer, clasped(oneOf('('), oneOf(')'), expr))(p);
 }
 
+}

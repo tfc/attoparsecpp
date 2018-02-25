@@ -2,6 +2,8 @@
 
 #include "catch.hpp"
 
+using namespace apl;
+
 SCENARIO( "op parser", "[math_expression_parser]" ) {
     GIVEN( "add_op parser" ) {
         WHEN( "given empty string" ) {

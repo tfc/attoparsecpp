@@ -6,6 +6,8 @@
 #define BENCHPRESS_CONFIG_MAIN
 #include "benchpress/benchpress.hpp"
 
+using namespace apl;
+
 std::string self_concat(const char *s, size_t times) {
     std::ostringstream ss;
     while (times--) { ss << s; }
