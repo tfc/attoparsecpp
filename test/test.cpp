@@ -1,4 +1,3 @@
-#include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
@@ -157,26 +156,68 @@ SCENARIO( "manyV parser combinations" ) {
 
 SCENARIO( "int parser", "[parser]" ) {
     GIVEN( "empty string" ) {
-        const auto r {run_parser(integer, "")};
+        const auto r {run_parser(base_integer(10), "")};
         REQUIRE_FALSE( !!r );
     }
     GIVEN( "string '1'" ) {
-        const auto r {run_parser(integer, "1")};
+        const auto r {run_parser(base_integer(10), "1")};
         REQUIRE( !!r );
         REQUIRE( r->first == 1 );
         REQUIRE( r->second.size() == 0 );
     }
     GIVEN( "string '1 '" ) {
-        const auto r {run_parser(integer, "1 ")};
+        const auto r {run_parser(base_integer(10), "1 ")};
         REQUIRE( !!r );
         REQUIRE( r->first == 1 );
         REQUIRE( r->second.size() == 1 );
     }
     GIVEN( "string '123'" ) {
-        const auto r {run_parser(integer, "123")};
+        const auto r {run_parser(base_integer(10), "123")};
         REQUIRE( !!r );
         REQUIRE( r->first == 123 );
         REQUIRE( r->second.size() == 0 );
+    }
+}
+
+SCENARIO( "auto int parser", "[parser]" ) {
+    GIVEN( "empty string" ) {
+        const auto r {run_parser(integer, "")};
+        REQUIRE( !r );
+    }
+    GIVEN( "string '0'" ) {
+        const auto r {run_parser(integer, "0")};
+        REQUIRE( r->first == 0 );
+    }
+    GIVEN( "string '0 '" ) {
+        const std::string s {"0 "};
+        const auto r {run_parser(integer, s)};
+        REQUIRE( r->first == 0 );
+        REQUIRE( r->second.size() == 1 );
+        REQUIRE( r->second.peek() == ' ' );
+    }
+    GIVEN( "string '1'" ) {
+        const auto r {run_parser(integer, "1")};
+        REQUIRE( r->first == 1 );
+    }
+    GIVEN( "string '01'" ) {
+        const auto r {run_parser(integer, "01")};
+        REQUIRE( r->first == 1 );
+    }
+    GIVEN( "string '0x1'" ) {
+        const auto r {run_parser(integer, "0x1")};
+        REQUIRE( r->first == 1 );
+    }
+    GIVEN( "string '12345'" ) {
+        const auto r {run_parser(integer, "12345")};
+        REQUIRE( r->first == 12345 );
+    }
+    GIVEN( "string '012345'" ) {
+        const auto r {run_parser(integer, "012345")};
+        REQUIRE( r->first == 012345 );
+    }
+    GIVEN( "string '0x123abc'" ) {
+        const auto r {run_parser(integer, "0x123abc")};
+        REQUIRE( r->first == 0x123abc );
     }
 }
 

@@ -51,7 +51,7 @@ static parser<int> term(str_pos p) {
 };
 
 static parser<int> factor(str_pos p) {
-    return choice(integer, clasped(oneOf('('), oneOf(')'), expr))(p);
+    return choice(base_integer(10), clasped(oneOf('('), oneOf(')'), expr))(p);
 }
 
 }

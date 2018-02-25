@@ -76,6 +76,10 @@ static parser<char> number(str_pos pos) {
     return sat([](char c) { return '0' <= c && c <= '9'; })(pos);
 }
 
+static parser<char> hexnumber(str_pos pos) {
+    return sat([](char c) { return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f'); })(pos);
+}
+
 namespace detail {
 
 template <typename L, typename T>
@@ -146,15 +150,41 @@ static auto manyV1(Parser p, size_t reserve_items = 0) {
     return manyV(p, true, reserve_items);
 }
 
+template <typename IntType = int>
+static auto base_integer(size_t base) {
+    return [base] (str_pos p) -> parser<IntType> {
+        IntType accum {0};
+        str_pos cursor {p};
+        const auto num_f = base == 16 ? hexnumber : number;
+        while (auto ret = num_f(cursor)) {
+            const char c {ret->first};
+            accum = base * accum + c;
+            if (base == 16 && ('a' <= c && c <= 'z')) { accum = accum + 10 - 'a'; }
+            else { accum -= '0'; }
+            cursor = ret->second;
+        }
+        if (p.first == cursor.first) { return {}; }
+        return {{accum, cursor}};
+    };
+}
+
 static parser<int> integer(str_pos p) {
-    int accum = 0;
-    str_pos cursor {p};
-    while (auto ret = number(cursor)) {
-        accum = 10 * accum + ret->first - '0';
-        cursor = ret->second;
-    }
-    if (p.first == cursor.first) { return {}; }
-    return {{accum, cursor}};
+    return not_at_end([] (str_pos pos) -> parser<int> {
+        size_t base {10};
+        if (*pos == '0') {
+            base = 8;
+            pos = pos.next();
+            if (pos.at_end()) {
+                return {{0, pos}};
+            } else if (*pos == 'x') {
+                base = 16;
+                pos = pos.next();
+            } else if (*pos < '0' || '9' < *pos) {
+                return {{0, pos}};
+            }
+        }
+        return base_integer(base)(pos);
+    })(p);
 }
 
 template <typename Parser>
