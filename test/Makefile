@@ -3,7 +3,7 @@ default: main
 catch.hpp:
 	wget https://raw.githubusercontent.com/CatchOrg/Catch2/master/single_include/catch.hpp
 
-CXXFLAGS=-O2 -std=c++1z
+CXXFLAGS=-O2 -std=c++14
 
 main.o: main.cpp catch.hpp
 	$(CC) $(CXXFLAGS) -c main.cpp

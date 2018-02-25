@@ -29,8 +29,8 @@ BENCHMARK("parse word of 10000 chars", [](benchpress::context* ctx) { measure_wo
 
 
 static void measure_vector_filling(size_t size, benchpress::context* ctx) {
-    const auto p {manyV(token(integer), size)};
-    const std::string s {self_concat("1 ", size)};
+    const auto p {manyV(token(integer), false, size)};
+    const std::string s {self_concat("1 ", size - 1)};
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
         auto r {parse_result(p, s)};
@@ -47,7 +47,7 @@ BENCHMARK("vector<int> of 10000 items", [](benchpress::context* ctx) { measure_v
 static auto csv_line(size_t reserve_items = 0) {
     return [reserve_items] (str_pos pos) {
         const auto comma_whitespace {prefixed(oneOf(','), many(oneOf(' ')))};
-        return sep_by(integer, comma_whitespace, reserve_items)(pos);
+        return sep_by1(integer, comma_whitespace, reserve_items)(pos);
     };
 }
 
@@ -73,7 +73,7 @@ static void sum_of_ints(size_t size, benchpress::context* ctx) {
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
         const auto r {parse_result(expr, s)};
-        assert(r == size);
+        assert(*r == size);
     }
 }
 

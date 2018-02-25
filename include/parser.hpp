@@ -1,17 +1,17 @@
 #pragma once
 
 #include <iterator>
-#include <optional>
-#include <sstream>
+#include <experimental/optional>
 #include <string>
 #include <tuple>
 #include <utility>
-
 #include <vector>
 
 using str_it = std::string::const_iterator;
 
 struct str_pos : public std::pair<str_it, str_it> {
+    str_pos(const std::pair<str_it, str_it> &p) : std::pair<str_it, str_it>{p} {}
+
     static str_pos from_str(const std::string &s) {
         return {std::pair{std::cbegin(s), std::cend(s)}};
     }
@@ -33,13 +33,6 @@ struct str_pos : public std::pair<str_it, str_it> {
 
     bool at_end() const { return size() == 0; }
 };
-
-static std::ostream& operator<<(std::ostream& os, const str_pos &p)
-{
-    os << "(";
-    std::copy(p.first, p.second, std::ostream_iterator<char>{os});
-    return os << ")";
-}
 
 template <typename T>
 using parser = std::optional<std::pair<T, str_pos>>;
@@ -77,14 +70,37 @@ static parser<char> number(str_pos pos) {
     return sat([](char c) { return '0' <= c && c <= '9'; })(pos);
 }
 
+namespace detail {
+
+template <typename L, typename T>
+static bool equalTo(const L& lhs, const T &rhs) {
+    return lhs == rhs;
+}
+
+template <typename L, typename T, typename ... Ts>
+static bool equalTo(const L& lhs, const T &rhs, const Ts& ... ts) {
+    return lhs == rhs || equalTo(lhs, ts...);
+}
+
+template <typename L, typename T>
+static bool unequalTo(const L& lhs, const T &rhs) {
+    return lhs != rhs;
+}
+template <typename L, typename T, typename ... Ts>
+static bool unequalTo(const L& lhs, const T &rhs, const Ts& ... ts) {
+    return lhs != rhs && unequalTo(lhs, ts...);
+}
+
+}
+
 template <typename ... Cs>
 static auto noneOf(Cs ... cs) {
-    return sat([cs...] (char c) { return ((c != cs) && ...); });
+    return sat([cs...] (char c) { return detail::unequalTo(c, cs...); });
 }
 
 template <typename ... Cs>
 static auto oneOf(Cs ... cs) {
-    return sat([cs...] (char c) { return ((c == cs) || ...); });
+    return sat([cs...] (char c) { return detail::equalTo(c, cs...); });
 }
 
 template <typename Parser>
@@ -106,17 +122,22 @@ static auto many1(Parser p) {
 }
 
 template <typename Parser, typename T = parser_payload_type<Parser>>
-static auto manyV(Parser p, size_t reserve_items = 0) {
-    return [p, reserve_items] (str_pos pos) -> parser<std::vector<T>> {
+static auto manyV(Parser p, bool minimum_one = false, size_t reserve_items = 0) {
+    return [p, minimum_one, reserve_items] (str_pos pos) -> parser<std::vector<T>> {
         std::vector<T> v;
         v.reserve(reserve_items);
         while (auto ret {p(pos)}) {
-            auto [c, newpos] = *ret;
-            v.push_back(c);
-            pos = newpos;
+            v.push_back(ret->first);
+            pos = ret->second;
         }
+        if (minimum_one && v.empty()) { return {}; }
         return {{std::move(v), pos}};
     };
+}
+
+template <typename Parser>
+static auto manyV1(Parser p, size_t reserve_items = 0) {
+    return manyV(p, true, reserve_items);
 }
 
 static parser<int> integer(str_pos p) {
@@ -126,9 +147,7 @@ static parser<int> integer(str_pos p) {
         accum = 10 * accum + ret->first - '0';
         cursor = ret->second;
     }
-    if (p.first == cursor.first) {
-        return {};
-    }
+    if (p.first == cursor.first) { return {}; }
     return {{accum, cursor}};
 }
 
@@ -136,9 +155,8 @@ template <typename Parser>
 static auto token(Parser parser) {
     return not_at_end([parser] (str_pos p) -> decltype(parser(str_pos::from_str(""))) {
         if (auto ret {parser(p)}) {
-            auto [c, newpos] = *ret;
-            if (auto ret2 {many(oneOf(' ', '\t'))(newpos)}) {
-                return {{c, ret2->second}};
+            if (auto ret2 {many(oneOf(' ', '\t'))(ret->second)}) {
+                return {{ret->first, ret2->second}};
             }
         }
         return {};
@@ -153,11 +171,10 @@ static auto sep_by(TParser item_parser, SepParser sep_parser, bool minimum_one =
         std::vector<T> v;
         v.reserve(reserve_items);
         while (auto ret {item_parser(pos)}) {
-            auto [c, newpos] = *ret;
-            v.emplace_back(std::move(c));
-            auto sep_ret {sep_parser(newpos)};
+            v.emplace_back(std::move(ret->first));
+            auto sep_ret {sep_parser(ret->second)};
             if (!sep_ret) {
-                pos = newpos;
+                pos = ret->second;
                 break;
             }
             pos = sep_ret->second;
@@ -166,6 +183,14 @@ static auto sep_by(TParser item_parser, SepParser sep_parser, bool minimum_one =
         return {{std::move(v), pos}};
     };
 }
+
+template <typename TParser, typename SepParser,
+          typename T = parser_payload_type<TParser>>
+static auto sep_by1(TParser item_parser, SepParser sep_parser, size_t reserve_items = 0) {
+    return sep_by(item_parser, sep_parser, true, reserve_items);
+}
+
+namespace detail {
 
 template <typename Parser>
 static parser<std::tuple<parser_payload_type<Parser>>>
@@ -189,9 +214,11 @@ apply_parsers(str_pos pos, const Parser &parser, const Parsers& ... rest_parsers
     return {};
 }
 
+}
+
 template <typename ... Parsers>
 static auto tuple_of(Parsers ... parsers) {
-    return [parsers...] (str_pos pos) { return apply_parsers(pos, parsers...); };
+    return [parsers...] (str_pos pos) { return detail::apply_parsers(pos, parsers...); };
 }
 
 template <typename Parser1, typename Parser2>
