@@ -46,6 +46,33 @@ SCENARIO( "Fundamental parsers", "[parser]" ) {
             REQUIRE( r->second.at_end() == true );
         }
     }
+    GIVEN( "const_string" ) {
+        const auto p {const_string("abcdef")};
+        WHEN( "given an empty string" ) {
+            const auto r {run_parser(p, "")};
+            REQUIRE( !r );
+        }
+        WHEN( "given bad string" ) {
+            const auto r {run_parser(p, "xzy")};
+            REQUIRE( !r );
+        }
+        WHEN( "given partly correct string" ) {
+            const auto r {run_parser(p, "abc")};
+            REQUIRE( !r );
+        }
+        WHEN( "given correct string" ) {
+            const auto r {run_parser(p, "abcdef")};
+            REQUIRE( r );
+            REQUIRE( r->first == "abcdef" );
+        }
+        WHEN( "given correct string plus suffix, rest string not consumed" ) {
+            const std::string s {"abcdefg"};
+            const auto r {run_parser(p, s)};
+            REQUIRE( r );
+            REQUIRE( r->first == "abcdef" );
+            REQUIRE( r->second.peek() == 'g' );
+        }
+    }
 }
 
 SCENARIO( "many parser combinations", "[parser]" ) {

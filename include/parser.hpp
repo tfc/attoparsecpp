@@ -113,6 +113,21 @@ static auto oneOf(Cs ... cs) {
     return sat([cs...] (char c) { return detail::equalTo(c, cs...); });
 }
 
+static auto const_string(std::string s) {
+    return [s] (str_pos pos) -> parser<std::string> {
+        for (const char c : s) {
+            if (auto ret {oneOf(c)(pos)}) {
+                pos = ret->second;
+            } else {
+                return {};
+            }
+        }
+        return {{s, pos}};
+    };
+}
+
+
+
 template <typename Parser>
 static auto many(Parser p, bool minimum_one = false) {
     return [p, minimum_one] (str_pos pos) -> parser<std::string> {
