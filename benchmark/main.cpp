@@ -20,7 +20,8 @@ static void measure_word_parsing(size_t size, benchpress::context* ctx) {
 
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
         auto r {parse_result(p, s)};
-        benchpress::escape(r->data());
+        benchpress::escape(const_cast<char*>(r->data()));
+        // can get rid of this ugly const_cast in c++17.
     }
 }
 

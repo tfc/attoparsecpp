@@ -10,7 +10,7 @@ benchpress/cxxopts.hpp:
 	cd benchpress && \
 	wget https://raw.githubusercontent.com/cjgdev/benchpress/master/src/benchpress/cxxopts.hpp)
 
-CXXFLAGS=-O2 -std=c++1z
+CXXFLAGS=-O2 -std=c++14
 
 main: main.cpp benchpress/benchpress.hpp benchpress/cxxopts.hpp ../include/parser.hpp ../include/math_expression.hpp
 	$(CC) $(CXXFLAGS) -I../include main.cpp -o main
