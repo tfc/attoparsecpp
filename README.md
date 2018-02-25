@@ -18,7 +18,7 @@ This repository is my attempt to provide a useful and simple library for composi
 Just include `parser.hpp` from the `include/` folder in your C++ file.
 This is a header-only library (but does not inherently have to be).
 
-You can find a lot of examples in the `test/` folder.
+You can find a lot of examples in the `test/` and `benchmark/` folders.
 
 There is also the mathematical expression parser example in `include/math_expression.hpp` which implements the very short and elegant `expr` parser from the [original Haskell monadic parsing paper](http://www.cs.nott.ac.uk/~pszgmh/pearl.pdf).
 Unit tests for this parser are in `test/math_expression.cpp`.
