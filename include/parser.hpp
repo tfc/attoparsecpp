@@ -15,30 +15,29 @@ namespace apl {
 
 using str_it = std::string::const_iterator;
 
-struct str_pos : public std::pair<str_it, str_it> {
-    str_pos(const std::pair<str_it, str_it> &p) : std::pair<str_it, str_it>{p} {}
+struct str_pos {
+    str_it it;
+    str_it end_it;
 
-    static str_pos from_str(const std::string &s) {
-        return {std::pair<str_it, str_it>{std::cbegin(s), std::cend(s)}};
-    }
+    str_pos(const std::string &s) : it{s.cbegin()}, end_it{s.cend()} {}
 
     std::optional<char> peek() const {
-        if (!at_end()) { return {*(this->first)}; }
+        if (!at_end()) { return {*it}; }
         return {};
     }
 
-    char operator*() const { return *(this->first); }
+    char operator*() const { return *it; }
 
     str_pos& next() {
-        ++first;
+        ++it;
         return *this;
     }
 
     char consume() {
-        return *(first++);
+        return *(it++);
     }
 
-    size_t size() const { return this->second - this->first; }
+    size_t size() const { return end_it - it; }
 
     bool at_end() const { return size() == 0; }
 };
@@ -348,7 +347,7 @@ template <typename Parser>
 static auto run_parser(Parser &&p, const std::string &s)
     -> std::pair<parser_ret<Parser>, str_pos>
 {
-    auto pos {str_pos::from_str(s)};
+    str_pos pos {s};
     return {p(pos), pos};
 }
 
@@ -356,7 +355,7 @@ template <typename Parser>
 static auto parse_result(Parser &&p, const std::string &s)
     -> parser_ret<Parser>
 {
-    auto pos {str_pos::from_str(s)};
+    str_pos pos {s};
     return p(pos);
 }
 
