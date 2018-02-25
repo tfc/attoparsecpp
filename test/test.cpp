@@ -397,4 +397,32 @@ SCENARIO( "tuple_of parsers", "[parser]" ) {
     }
 }
 
+SCENARIO( "choice parsers", "[parser]" ) {
+    GIVEN( "choice of A B number" ) {
+        const auto p {choice(oneOf('A'), oneOf('B'), number)};
+        WHEN( "given an empty string" ) {
+            const auto r {run_parser(p, "")};
+            REQUIRE( !r );
+        }
+        WHEN( "given A" ) {
+            const auto r {run_parser(p, "A")};
+            REQUIRE( !!r );
+            REQUIRE( r->first == 'A' );
+        }
+        WHEN( "given B" ) {
+            const auto r {run_parser(p, "B")};
+            REQUIRE( !!r );
+            REQUIRE( r->first == 'B' );
+        }
+        WHEN( "given C" ) {
+            const auto r {run_parser(p, "C")};
+            REQUIRE( !r );
+        }
+        WHEN( "given 5" ) {
+            const auto r {run_parser(p, "5")};
+            REQUIRE( !!r );
+            REQUIRE( r->first == '5' );
+        }
+    }
 
+}

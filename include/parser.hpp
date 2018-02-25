@@ -328,14 +328,24 @@ static auto clasped(Parser1 open_parser, Parser2 close_parser, Parser3 parser)
     return postfixed(close_parser, prefixed(open_parser, parser));
 }
 
-template <typename Parser1, typename Parser2>
-static auto choice(Parser1 p1, Parser2 p2)
+namespace detail {
+template <typename Parser>
+static parser_ret<Parser> apply_parser_choice(str_pos pos, Parser p) {
+    return p(pos);
+}
+
+template <typename Parser, typename ...Parsers>
+static parser_ret<Parser> apply_parser_choice(str_pos pos, Parser p, Parsers ... ps) {
+    if (auto ret {p(pos)}) { return ret; }
+    return apply_parser_choice(pos, ps...);
+}
+}
+
+template <typename ...Parsers>
+static auto choice(Parsers ... ps)
 {
-    return [p1, p2] (str_pos pos) {
-        if (auto ret1 {p1(pos)}) {
-            return ret1;
-        }
-        return p2(pos);
+    return [ps...] (str_pos pos) {
+        return detail::apply_parser_choice(pos, ps...);
     };
 }
 
