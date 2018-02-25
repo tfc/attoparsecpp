@@ -13,9 +13,11 @@ namespace std {
 
 namespace apl {
 
-using str_it = std::string::const_iterator;
+#ifndef __USE_OWN_STRPOS_IMPL__
 
 struct str_pos {
+    using str_it = std::string::const_iterator;
+
     str_it it;
     str_it end_it;
 
@@ -41,6 +43,8 @@ struct str_pos {
 
     bool at_end() const { return size() == 0; }
 };
+
+#endif
 
 template <typename T>
 using parser = std::optional<T>;
