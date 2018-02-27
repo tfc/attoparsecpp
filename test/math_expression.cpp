@@ -1,6 +1,6 @@
 #include <math_expression.hpp>
 
-#include "catch.hpp"
+#include <catch/catch.hpp>
 
 using namespace apl;
 

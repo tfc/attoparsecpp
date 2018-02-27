@@ -5,7 +5,7 @@
 
 #include <parser.hpp>
 
-#include "catch.hpp"
+#include <catch/catch.hpp>
 
 using namespace apl;
 
