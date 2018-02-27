@@ -7,8 +7,8 @@ rec {
     name = "attoparsecpp";
     version = "dev-0.1";
     buildInputs = with pkgs; [
-      (callPackage ./catch.nix {})
-      (callPackage ./googlebench.nix {})
+      (callPackage ./catch.nix { stdenv = stdenv; })
+      (callPackage ./googlebench.nix { stdenv = stdenv; })
       gnumake
       gtest
     ];
