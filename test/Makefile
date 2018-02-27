@@ -15,4 +15,4 @@ main: main.o test.o math_expression.o
 	$(CXX) -o main main.o test.o math_expression.o
 
 clean:
-	rm -rf main *.o catch.hpp
+	rm -rf main *.o 
