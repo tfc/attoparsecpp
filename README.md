@@ -79,23 +79,55 @@ Benchmark output on a Macbook Pro late 2013
 - 16 GB 1600 MHz DDR3L SDRAM
 
 ``` bash
-parse word of    10 chars              20000000          55 ns/op
-parse word of   100 chars               1000000        1084 ns/op
-parse word of  1000 chars                200000        5541 ns/op
-parse word of 10000 chars                 50000       48410 ns/op
-vector<int> of    10 items              5000000         321 ns/op
-vector<int> of   100 items              1000000        1238 ns/op
-vector<int> of  1000 items               200000       10125 ns/op
-vector<int> of 10000 items                20000       97389 ns/op
-sum of    10 ints                       5000000         275 ns/op
-sum of   100 ints                        500000        2680 ns/op
-sum of  1000 ints                         50000       26113 ns/op
-sum of 10000 ints                          5000      260483 ns/op
-product of    10 ints                  10000000         181 ns/op
-product of   100 ints                   1000000        1662 ns/op
-product of  1000 ints                    100000       16364 ns/op
-product of 10000 ints                     10000      163884 ns/op
+$ make && ./main
+clang++ -O2 -std=c++14 -lbenchmark -I../include main.cpp -o main
+Run on (8 X 2300 MHz CPU s)
+2018-02-27 13:53:18
+-----------------------------------------------------------------------
+Benchmark                                Time           CPU Iterations
+-----------------------------------------------------------------------
+measure_word_parsing/10                 60 ns         59 ns   11958044
+measure_word_parsing/100              1122 ns       1117 ns     615309
+measure_word_parsing/1000             5624 ns       5614 ns     122420
+measure_word_parsing/10000           46167 ns      46050 ns      15128
+measure_word_parsing/100000         447579 ns     446684 ns       1523
+measure_word_parsing/1000000       4793773 ns    4770685 ns        149
+measure_word_parsing/10000000     51993664 ns   51924583 ns         12
+measure_word_parsing_BigO             5.20 N       5.19 N
+measure_word_parsing_RMS                 2 %          2 %
+measure_vector_filling/10              424 ns        422 ns    1642071
+measure_vector_filling/100            2291 ns       2280 ns     301999
+measure_vector_filling/1000          20898 ns      20852 ns      34442
+measure_vector_filling/10000        208505 ns     207562 ns       3555
+measure_vector_filling/100000      2054322 ns    2040226 ns        337
+measure_vector_filling/1000000    21730601 ns   21642455 ns         33
+measure_vector_filling/10000000  223637116 ns  223132000 ns          3
+measure_vector_filling_BigO          22.36 N      22.31 N
+measure_vector_filling_RMS               1 %          1 %
+csv_vector_of_ints/10                  414 ns        412 ns    1693202
+csv_vector_of_ints/100                2194 ns       2185 ns     320976
+csv_vector_of_ints/1000              18223 ns      18196 ns      38116
+csv_vector_of_ints/10000            181302 ns     181041 ns       3820
+csv_vector_of_ints/100000          1867089 ns    1862028 ns        363
+csv_vector_of_ints/1000000        18843539 ns   18808769 ns         39
+csv_vector_of_ints/10000000      200541779 ns  200397750 ns          4
+csv_vector_of_ints_BigO              20.04 N      20.03 N
+csv_vector_of_ints_RMS                   1 %          1 %
+sum_of_ints/10                         313 ns        312 ns    2183304
+sum_of_ints/100                       3068 ns       3064 ns     220643
+sum_of_ints/1000                     30839 ns      30772 ns      22453
+sum_of_ints/10000                   310284 ns     310001 ns       2243
+sum_of_ints/100000                 3130188 ns    3124631 ns        225
+sum_of_ints/1000000               30558996 ns   30527304 ns         23
+sum_of_ints/10000000             309699901 ns  309107000 ns          2
+product_of_ints/10                     195 ns        195 ns    3498286
+product_of_ints/100                   1814 ns       1812 ns     397680
+product_of_ints/1000                 17817 ns      17805 ns      38756
+product_of_ints/10000               176918 ns     176772 ns       3829
+product_of_ints/100000             1762898 ns    1761650 ns        369
+product_of_ints/1000000           17843418 ns   17833368 ns         38
+product_of_ints/10000000         176399736 ns  176310500 ns          4
+product_of_ints_BigO                 17.64 N      17.63 N
+product_of_ints_RMS                      0 %          0 %
 ```
-
-
 

@@ -1,12 +1,16 @@
 #include <cassert>
+#include <sstream>
 
 #include <parser.hpp>
 #include <math_expression.hpp>
 
-#define BENCHPRESS_CONFIG_MAIN
-#include "benchpress/benchpress.hpp"
+#include <benchmark/benchmark.h>
+
+BENCHMARK_MAIN()
 
 using namespace apl;
+
+constexpr size_t max_range {10000000};
 
 std::string self_concat(const char *s, size_t times) {
     std::ostringstream ss;
@@ -14,38 +18,34 @@ std::string self_concat(const char *s, size_t times) {
     return ss.str();
 }
 
-static void measure_word_parsing(size_t size, benchpress::context* ctx) {
+static void measure_word_parsing(benchmark::State &state) {
+    const size_t size {static_cast<size_t>(state.range(0))};
     const auto p {many(noneOf(' '))};
     const std::string s {self_concat("a", size)};
 
-    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+    for (auto _ : state) {
         auto r {parse_result(p, s)};
-        benchpress::escape(const_cast<char*>(r->data()));
-        // can get rid of this ugly const_cast in c++17.
+        benchmark::DoNotOptimize(r->data());
     }
+    state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK("parse word of    10 chars", [](benchpress::context* ctx) { measure_word_parsing(10, ctx); })
-BENCHMARK("parse word of   100 chars", [](benchpress::context* ctx) { measure_word_parsing(100, ctx); })
-BENCHMARK("parse word of  1000 chars", [](benchpress::context* ctx) { measure_word_parsing(1000, ctx); })
-BENCHMARK("parse word of 10000 chars", [](benchpress::context* ctx) { measure_word_parsing(10000, ctx); })
+BENCHMARK(measure_word_parsing)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
 
-
-static void measure_vector_filling(size_t size, benchpress::context* ctx) {
+static void measure_vector_filling(benchmark::State &state) {
+    const size_t size {static_cast<size_t>(state.range(0))};
     const auto p {manyV(token(integer), false, size)};
-    const std::string s {self_concat("1 ", size - 1)};
+    const std::string s {self_concat("1 ", size)};
 
-    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+    for (auto _ : state) {
         auto r {parse_result(p, s)};
-        benchpress::escape(r->data());
+        benchmark::DoNotOptimize(r->data());
+        assert(r->size() == size);
     }
+    state.SetComplexityN(state.range(0));
 }
 
-
-BENCHMARK("vector<int> of    10 items", [](benchpress::context* ctx) { measure_vector_filling(10, ctx); })
-BENCHMARK("vector<int> of   100 items", [](benchpress::context* ctx) { measure_vector_filling(100, ctx); })
-BENCHMARK("vector<int> of  1000 items", [](benchpress::context* ctx) { measure_vector_filling(1000, ctx); })
-BENCHMARK("vector<int> of 10000 items", [](benchpress::context* ctx) { measure_vector_filling(10000, ctx); })
+BENCHMARK(measure_vector_filling)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
 
 static auto csv_line(size_t reserve_items = 0) {
     return [reserve_items] (str_pos pos) {
@@ -54,49 +54,48 @@ static auto csv_line(size_t reserve_items = 0) {
     };
 }
 
-static void csv_vector_of_ints(size_t size, benchpress::context* ctx) {
+static void csv_vector_of_ints(benchmark::State &state) {
+    const size_t size {static_cast<size_t>(state.range(0))};
     assert(size > 0);
     const std::string s {std::string{"1"} + self_concat(", 1", size - 1)};
     const auto p {csv_line(size)};
 
-    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+    for (auto _ : state) {
         const auto r {parse_result(p, s)};
+        benchmark::DoNotOptimize(r->data());
         assert(r->size() == size);
     }
+    state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK("csv vector of    10 ints", [](benchpress::context* ctx) { csv_vector_of_ints(10, ctx); })
-BENCHMARK("csv vector of   100 ints", [](benchpress::context* ctx) { csv_vector_of_ints(100, ctx); })
-BENCHMARK("csv vector of  1000 ints", [](benchpress::context* ctx) { csv_vector_of_ints(1000, ctx); })
-BENCHMARK("csv vector of 10000 ints", [](benchpress::context* ctx) { csv_vector_of_ints(10000, ctx); })
+BENCHMARK(csv_vector_of_ints)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
 
-static void sum_of_ints(size_t size, benchpress::context* ctx) {
+static void sum_of_ints(benchmark::State &state) {
+    const size_t size {static_cast<size_t>(state.range(0))};
     assert(size > 0);
     const std::string s {std::string{"1 "} + self_concat("+ 1", size - 1)};
 
-    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+    for (auto _ : state) {
         const auto r {parse_result(expr, s)};
+        benchmark::DoNotOptimize(*r == size);
         assert(*r == size);
     }
+    state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK("sum of    10 ints", [](benchpress::context* ctx) { sum_of_ints(10, ctx); })
-BENCHMARK("sum of   100 ints", [](benchpress::context* ctx) { sum_of_ints(100, ctx); })
-BENCHMARK("sum of  1000 ints", [](benchpress::context* ctx) { sum_of_ints(1000, ctx); })
-BENCHMARK("sum of 10000 ints", [](benchpress::context* ctx) { sum_of_ints(10000, ctx); })
+BENCHMARK(sum_of_ints)->RangeMultiplier(10)->Range(10, max_range);
 
-static void product_of_ints(size_t size, benchpress::context* ctx) {
+static void product_of_ints(benchmark::State &state) {
+    const size_t size {static_cast<size_t>(state.range(0))};
     assert(size > 0);
     const std::string s {std::string{"1 "} + self_concat("* 1", size - 1)};
 
-    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+    for (auto _ : state) {
         const auto r {parse_result(expr, s)};
+        benchmark::DoNotOptimize(r == 1);
         assert(r == 1);
     }
+    state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK("product of    10 ints", [](benchpress::context* ctx) { product_of_ints(10, ctx); })
-BENCHMARK("product of   100 ints", [](benchpress::context* ctx) { product_of_ints(100, ctx); })
-BENCHMARK("product of  1000 ints", [](benchpress::context* ctx) { product_of_ints(1000, ctx); })
-BENCHMARK("product of 10000 ints", [](benchpress::context* ctx) { product_of_ints(10000, ctx); })
-
+BENCHMARK(product_of_ints)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;

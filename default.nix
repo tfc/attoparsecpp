@@ -7,10 +7,9 @@ in rec {
     version = "dev-0.1";
     buildInputs = with pkgs; [
       (callPackage ./catch.nix {})
-      (callPackage ./benchpress.nix {})
+      (callPackage ./googlebench.nix {})
       gcc
       gnumake
-      gbenchmark
       gtest
     ];
   };
