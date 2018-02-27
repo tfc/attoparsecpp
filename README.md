@@ -70,6 +70,34 @@ std::optional<int> evalutate_math_expression(std::string input) {
 `run_parser` returns a tuple that contains the result of successful parsing in the first field and the rest of the not consumed part of the string in the second field.
 The whole tuple is wrapped into an `std::optional` which enables the parser lib to indicate failure.
 
+## Building tests and benchmarks
+
+You need to install the following libraries:
+
+- [googletest](https://github.com/google/googletest)
+- [google benchmark](https://github.com/google/benchmark)
+
+> In order to install them automatically, you can just run `nix-shell` in the project directory.
+> It will install all dependencies (see file [`default.nix`](./default.nix)) and put them in place.
+>
+> `nix-shell` is part of the [Nix package manager](https://nixos.org/nix/) for Unix/Linux/Mac.
+
+### Tests
+
+``` bash
+cd test
+make
+./main
+```
+
+### Benchmrks
+
+``` bash
+cd benchmark
+make
+./main
+```
+
 ## Performance
 
 Benchmark output on a Macbook Pro late 2013
