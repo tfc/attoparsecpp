@@ -405,9 +405,11 @@ SCENARIO( "choice parsers", "[parser]" ) {
             REQUIRE( !r );
         }
         WHEN( "given A" ) {
-            const auto r {run_parser(p, "A")};
+            const std::string s {"A "};
+            const auto r {run_parser(p, s)};
             REQUIRE( !!r );
             REQUIRE( r->first == 'A' );
+            REQUIRE( r->second.peek() == ' ' );
         }
         WHEN( "given B" ) {
             const auto r {run_parser(p, "B")};
@@ -419,9 +421,11 @@ SCENARIO( "choice parsers", "[parser]" ) {
             REQUIRE( !r );
         }
         WHEN( "given 5" ) {
-            const auto r {run_parser(p, "5")};
+            const std::string s {"5 "};
+            const auto r {run_parser(p, s)};
             REQUIRE( !!r );
             REQUIRE( r->first == '5' );
+            REQUIRE( r->second.peek() == ' ' );
         }
     }
 
