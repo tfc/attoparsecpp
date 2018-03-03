@@ -19,7 +19,7 @@ rec {
     '';
 
     buildInputs = with pkgs; [
-      (callPackage ./catch.nix { stdenv = stdenv; })
+      (callPackage ./catch.nix { })
       (callPackage ./googlebench.nix { stdenv = stdenv; })
       gnumake
       gtest
