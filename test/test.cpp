@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <parser.hpp>
+#include <attoparsecpp/parser.hpp>
 
 #include <catch/catch.hpp>
 

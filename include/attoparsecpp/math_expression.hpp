@@ -1,6 +1,6 @@
 #pragma once
 
-#include <parser.hpp>
+#include "parser.hpp"
 
 /*
  * Following BNF Grammar from "functional pearls - monadic parsing in haskell"

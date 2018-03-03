@@ -1,11 +1,13 @@
 default: main
 
-CXXFLAGS=-O2 -std=c++14
-
+CXXFLAGS=-O2 -std=c++14 -I../include
 LDFLAGS=-lbenchmark -lpthread
- 
-main: main.cpp ../include/parser.hpp ../include/math_expression.hpp
-	$(CXX) $(CXXFLAGS) -I../include main.cpp -o main $(LDFLAGS)
+
+main: main.cpp
+	$(CXX) $(CXXFLAGS) main.cpp -o main $(LDFLAGS)
 
 clean:
-	rm -rf main *.o 
+	rm -rf main *.o
+
+check: main
+	./main

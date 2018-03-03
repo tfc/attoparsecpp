@@ -1,19 +1,21 @@
-default: main
+default: .depend main
 
-CXXFLAGS=-g -fsanitize=address -fsanitize=undefined -std=c++14
+CXXFLAGS=-g -fsanitize=address -fsanitize=undefined -std=c++14 -I../include
 LDFLAGS=-lasan -lubsan
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+SRC = main.cpp math_expression.cpp test.cpp
 
-test.o: test.cpp ../include/parser.hpp
-	$(CXX) $(CXXFLAGS) -I../include -c test.cpp
+.depend: $(SRC)
+	$(CXX) $(CXXFLAGS) -MM $(SRC) > .depend
 
-math_expression.o: math_expression.cpp ../include/parser.hpp ../include/math_expression.hpp
-	$(CXX) $(CXXFLAGS) -I../include -c math_expression.cpp
+-include .depend
 
 main: main.o test.o math_expression.o
-	$(CXX) -o main main.o test.o math_expression.o $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o main main.o test.o math_expression.o $(LDFLAGS)
 
+.PHONY: clean
 clean:
-	rm -rf main *.o
+	rm -rf main *.o .depend
+
+check: main
+	./main
