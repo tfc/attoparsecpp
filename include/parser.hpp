@@ -61,6 +61,8 @@ static auto not_at_end(F f)
     };
 }
 
+static parser<char> anyChar(str_pos &pos) __attribute__((unused));
+
 static parser<char> anyChar(str_pos &pos) {
     return not_at_end([] (str_pos &p) -> parser<char> {
         return {p.consume()};
@@ -77,9 +79,13 @@ static auto sat(F predicate) {
     });
 }
 
+static parser<char> number(str_pos &pos) __attribute__((unused));
+
 static parser<char> number(str_pos &pos) {
     return sat([](char c) { return '0' <= c && c <= '9'; })(pos);
 }
+
+static parser<char> hexnumber(str_pos &pos) __attribute__((unused));
 
 static parser<char> hexnumber(str_pos &pos) {
     return sat([](char c) { return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f'); })(pos);
@@ -117,6 +123,8 @@ template <typename ... Cs>
 static auto oneOf(Cs ... cs) {
     return sat([cs...] (char c) { return detail::equalTo(c, cs...); });
 }
+
+static auto const_string(std::string s) __attribute__((unused));
 
 static auto const_string(std::string s) {
     return [s] (str_pos &pos) -> parser<std::string> {
@@ -184,6 +192,8 @@ static auto base_integer(size_t base) {
         return {accum};
     };
 }
+
+static parser<int> integer(str_pos &p) __attribute__((unused));
 
 static parser<int> integer(str_pos &p) {
     return not_at_end([] (str_pos &pos) -> parser<int> {
