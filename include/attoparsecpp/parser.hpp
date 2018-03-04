@@ -179,19 +179,20 @@ static auto manyV1(Parser p, size_t reserve_items = 0) {
 }
 
 template <typename IntType = int>
-static auto base_integer(size_t base) {
-    return [base] (str_pos &p) -> parser<IntType> {
+static auto base_integer(size_t base, size_t max_digits = ~0ull) {
+    return [base, max_digits] (str_pos &p) -> parser<IntType> {
         IntType accum {0};
-        bool at_least_one {false};
+        size_t digits {0};
         const auto num_f = base == 16 ? hexnumber : number;
-        while (auto ret = num_f(p)) {
-            at_least_one = true;
+        parser_ret<decltype(num_f)> ret;
+        while (digits < max_digits && (ret = num_f(p))) {
+            ++digits;
             const char c {*ret};
             accum = base * accum + c;
             if (base == 16 && ('a' <= c && c <= 'z')) { accum = accum + 10 - 'a'; }
             else { accum -= '0'; }
         }
-        if (!at_least_one) { return {}; }
+        if (!digits) { return {}; }
         return {accum};
     };
 }
