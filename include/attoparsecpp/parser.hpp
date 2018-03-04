@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <experimental/optional>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -15,7 +16,24 @@ namespace apl {
 
 #ifndef __USE_OWN_STRPOS_IMPL__
 
-struct str_pos {
+struct buffer_pos {
+    virtual char        operator*() const = 0;
+    virtual buffer_pos& operator++()      = 0;
+
+    virtual bool                at_end()     = 0;
+    virtual char                consume() {
+        const char c {*peek()};
+        ++(*this);
+        return c;
+    };
+    virtual std::optional<char> peek() {
+        if (!at_end()) { return *(*this); }
+        return {};
+    };
+
+};
+
+struct str_pos : public buffer_pos {
     using str_it = std::string::const_iterator;
 
     str_it it;
@@ -23,25 +41,23 @@ struct str_pos {
 
     str_pos(const std::string &s) : it{s.cbegin()}, end_it{s.cend()} {}
 
-    std::optional<char> peek() const {
+    std::optional<char> peek() {
         if (!at_end()) { return {*it}; }
         return {};
     }
 
-    char operator*() const { return *it; }
+    virtual char operator*() const override { return *it; }
+
+    virtual buffer_pos& operator++() override { return next(); }
 
     str_pos& next() {
         ++it;
         return *this;
     }
 
-    char consume() {
-        return *(it++);
-    }
-
     size_t size() const { return end_it - it; }
 
-    bool at_end() const { return size() == 0; }
+    virtual bool at_end() override { return size() == 0; }
 };
 
 #endif
@@ -58,23 +74,23 @@ using parser_payload_type = typename parser_ret<Parser>::value_type;
 template <typename F>
 static auto not_at_end(F f)
 {
-    return [f] (str_pos &p) -> parser<parser_payload_type<F>> {
+    return [f] (buffer_pos &p) -> parser<parser_payload_type<F>> {
         if (p.at_end()) { return {}; }
         return f(p);
     };
 }
 
-static parser<char> anyChar(str_pos &pos) __attribute__((unused));
+static parser<char> anyChar(buffer_pos &pos) __attribute__((unused));
 
-static parser<char> anyChar(str_pos &pos) {
-    return not_at_end([] (str_pos &p) -> parser<char> {
+static parser<char> anyChar(buffer_pos &pos) {
+    return not_at_end([] (buffer_pos &p) -> parser<char> {
         return {p.consume()};
     })(pos);
 }
 
 template <typename F>
 static auto sat(F predicate) {
-    return not_at_end([predicate] (str_pos &p) -> parser<char> {
+    return not_at_end([predicate] (buffer_pos &p) -> parser<char> {
         if (predicate(*p)) {
             return {p.consume()};
         }
@@ -82,15 +98,15 @@ static auto sat(F predicate) {
     });
 }
 
-static parser<char> number(str_pos &pos) __attribute__((unused));
+static parser<char> number(buffer_pos &pos) __attribute__((unused));
 
-static parser<char> number(str_pos &pos) {
+static parser<char> number(buffer_pos &pos) {
     return sat([](char c) { return '0' <= c && c <= '9'; })(pos);
 }
 
-static parser<char> hexnumber(str_pos &pos) __attribute__((unused));
+static parser<char> hexnumber(buffer_pos &pos) __attribute__((unused));
 
-static parser<char> hexnumber(str_pos &pos) {
+static parser<char> hexnumber(buffer_pos &pos) {
     return sat([](char c) { return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f'); })(pos);
 }
 
@@ -130,7 +146,7 @@ static auto oneOf(Cs ... cs) {
 static auto const_string(std::string s) __attribute__((unused));
 
 static auto const_string(std::string s) {
-    return [s] (str_pos &pos) -> parser<std::string> {
+    return [s] (buffer_pos &pos) -> parser<std::string> {
         for (const char c : s) {
             if (auto ret {oneOf(c)(pos)}) {
             } else {
@@ -145,7 +161,7 @@ static auto const_string(std::string s) {
 
 template <typename Parser>
 static auto many(Parser p, bool minimum_one = false) {
-    return [p, minimum_one] (str_pos &pos) -> parser<std::string> {
+    return [p, minimum_one] (buffer_pos &pos) -> parser<std::string> {
         std::string s;
         while (auto ret {p(pos)}) {
             s.push_back(*ret);
@@ -162,7 +178,7 @@ static auto many1(Parser p) {
 
 template <typename Parser, typename T = parser_payload_type<Parser>>
 static auto manyV(Parser p, bool minimum_one = false, size_t reserve_items = 0) {
-    return [p, minimum_one, reserve_items] (str_pos &pos) -> parser<std::vector<T>> {
+    return [p, minimum_one, reserve_items] (buffer_pos &pos) -> parser<std::vector<T>> {
         std::vector<T> v;
         v.reserve(reserve_items);
         while (auto ret {p(pos)}) {
@@ -180,7 +196,7 @@ static auto manyV1(Parser p, size_t reserve_items = 0) {
 
 template <typename IntType = int>
 static auto base_integer(size_t base, size_t max_digits = ~0ull) {
-    return [base, max_digits] (str_pos &p) -> parser<IntType> {
+    return [base, max_digits] (buffer_pos &p) -> parser<IntType> {
         IntType accum {0};
         size_t digits {0};
         const auto num_f = base == 16 ? hexnumber : number;
@@ -197,19 +213,19 @@ static auto base_integer(size_t base, size_t max_digits = ~0ull) {
     };
 }
 
-static parser<int> integer(str_pos &p) __attribute__((unused));
+static parser<int> integer(buffer_pos &p) __attribute__((unused));
 
-static parser<int> integer(str_pos &p) {
-    return not_at_end([] (str_pos &pos) -> parser<int> {
+static parser<int> integer(buffer_pos &p) {
+    return not_at_end([] (buffer_pos &pos) -> parser<int> {
         size_t base {10};
         if (*pos == '0') {
             base = 8;
-            pos = pos.next();
+            ++pos;
             if (pos.at_end()) {
                 return {0};
             } else if (*pos == 'x') {
                 base = 16;
-                pos = pos.next();
+                ++pos;
             } else if (*pos < '0' || '9' < *pos) {
                 return {0};
             }
@@ -220,7 +236,7 @@ static parser<int> integer(str_pos &p) {
 
 template <typename Parser>
 static auto token(Parser parser) {
-    return not_at_end([parser] (str_pos &p) -> parser_ret<Parser> {
+    return not_at_end([parser] (buffer_pos &p) -> parser_ret<Parser> {
         if (auto ret {parser(p)}) {
             if (auto ret2 {many(oneOf(' ', '\t'))(p)}) {
                 return ret;
@@ -234,7 +250,7 @@ template <typename TParser, typename SepParser,
           typename T = parser_payload_type<TParser>>
 static auto sep_by(TParser item_parser, SepParser sep_parser, bool minimum_one = false, size_t reserve_items = 0) {
     return [item_parser, sep_parser, minimum_one, reserve_items]
-        (str_pos &pos) -> parser<std::vector<T>> {
+        (buffer_pos &pos) -> parser<std::vector<T>> {
         std::vector<T> v;
         v.reserve(reserve_items);
         while (auto ret {item_parser(pos)}) {
@@ -259,7 +275,7 @@ namespace detail {
 
 template <typename Parser>
 static parser<std::tuple<parser_payload_type<Parser>>>
-apply_parsers(str_pos &pos, const Parser &parser) {
+apply_parsers(buffer_pos &pos, const Parser &parser) {
     if (auto ret {parser(pos)}) {
         return {std::make_tuple(std::move(*ret))};
     }
@@ -268,7 +284,7 @@ apply_parsers(str_pos &pos, const Parser &parser) {
 
 template <typename Parser, typename ... Parsers>
 static parser<std::tuple<parser_payload_type<Parser>, parser_payload_type<Parsers> ...>>
-apply_parsers(str_pos &pos, const Parser &parser, const Parsers& ... rest_parsers) {
+apply_parsers(buffer_pos &pos, const Parser &parser, const Parsers& ... rest_parsers) {
     if (auto ret {parser(pos)}) {
         if (auto ret_rest {apply_parsers(pos, rest_parsers...)}) {
             return {std::tuple_cat(std::make_tuple(std::move(*ret)),
@@ -282,14 +298,14 @@ apply_parsers(str_pos &pos, const Parser &parser, const Parsers& ... rest_parser
 
 template <typename ... Parsers>
 static auto tuple_of(Parsers ... parsers) {
-    return [parsers...] (str_pos &pos) { return detail::apply_parsers(pos, parsers...); };
+    return [parsers...] (buffer_pos &pos) { return detail::apply_parsers(pos, parsers...); };
 }
 
 template <typename Parser1, typename Parser2>
 static auto chainl1(Parser1 item_parser, Parser2 op_parser)
 {
     using T = parser_payload_type<Parser1>;
-    return [item_parser, op_parser] (str_pos &p) -> parser<T> {
+    return [item_parser, op_parser] (buffer_pos &p) -> parser<T> {
         auto i {item_parser(p)};
         if (!i) { return {}; }
         auto accum {*i};
@@ -310,7 +326,7 @@ static auto chainl1(Parser1 item_parser, Parser2 op_parser)
 template <typename Parser1, typename Parser2>
 static auto prefixed(Parser1 prefix_parser, Parser2 parser)
 {
-    return [prefix_parser, parser] (str_pos &pos) -> parser_ret<Parser2> {
+    return [prefix_parser, parser] (buffer_pos &pos) -> parser_ret<Parser2> {
         if (auto ret1 {prefix_parser(pos)}) {
             return parser(pos);
         }
@@ -321,7 +337,7 @@ static auto prefixed(Parser1 prefix_parser, Parser2 parser)
 template <typename Parser1, typename Parser2>
 static auto postfixed(Parser1 suffix_parser, Parser2 parser)
 {
-    return [suffix_parser, parser] (str_pos &pos) -> parser_ret<Parser2> {
+    return [suffix_parser, parser] (buffer_pos &pos) -> parser_ret<Parser2> {
         if (auto ret1 {parser(pos)}) {
             if (auto ret2 {suffix_parser(pos)}) {
                 return ret1;
@@ -339,12 +355,12 @@ static auto clasped(Parser1 open_parser, Parser2 close_parser, Parser3 parser)
 
 namespace detail {
 template <typename Parser>
-static parser_ret<Parser> apply_parser_choice(str_pos &pos, Parser p) {
+static parser_ret<Parser> apply_parser_choice(buffer_pos &pos, Parser p) {
     return p(pos);
 }
 
 template <typename Parser, typename ...Parsers>
-static parser_ret<Parser> apply_parser_choice(str_pos &pos, Parser p, Parsers ... ps) {
+static parser_ret<Parser> apply_parser_choice(buffer_pos &pos, Parser p, Parsers ... ps) {
     if (auto ret {p(pos)}) { return ret; }
     return apply_parser_choice(pos, ps...);
 }
@@ -353,14 +369,14 @@ static parser_ret<Parser> apply_parser_choice(str_pos &pos, Parser p, Parsers ..
 template <typename ...Parsers>
 static auto choice(Parsers ... ps)
 {
-    return [ps...] (str_pos &pos) {
+    return [ps...] (buffer_pos &pos) {
         return detail::apply_parser_choice(pos, ps...);
     };
 }
 
 template <typename P, typename F>
 static auto map(P p, F f) {
-    return [p, f] (str_pos &pos) -> parser<typename std::result_of<F(parser_payload_type<P>)>::type> {
+    return [p, f] (buffer_pos &pos) -> parser<typename std::result_of<F(parser_payload_type<P>)>::type> {
         if (auto ret {p(pos)}) {
             return {f(*ret)};
         }
@@ -370,16 +386,14 @@ static auto map(P p, F f) {
 
 
 template <typename Parser>
-static auto run_parser(Parser &&p, const std::string &s)
-    -> std::pair<parser_ret<Parser>, str_pos>
+static std::pair<parser_ret<Parser>, std::unique_ptr<str_pos>> run_parser(Parser &&p, const std::string &s)
 {
-    str_pos pos {s};
-    return {p(pos), pos};
+    auto pos {std::make_unique<str_pos>(s)};
+    return {p(*pos), std::move(pos)};
 }
 
 template <typename Parser>
-static auto parse_result(Parser &&p, const std::string &s)
-    -> parser_ret<Parser>
+static parser_ret<Parser> parse_result(Parser &&p, const std::string &s)
 {
     str_pos pos {s};
     return p(pos);

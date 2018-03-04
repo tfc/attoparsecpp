@@ -20,15 +20,15 @@ SCENARIO( "Fundamental parsers", "[parser]" ) {
             const auto r {run_parser(anyChar, "a")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == 'a' );
-            REQUIRE( r.second.at_end() == true );
+            REQUIRE( r.second->at_end() == true );
         }
         WHEN( "given an alphabetic string \"ab\"" ) {
             const std::string s {"ab"};
             const auto r {run_parser(anyChar, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == 'a' );
-            REQUIRE( r.second.size() == 1);
-            REQUIRE( r.second.peek() == 'b' );
+            REQUIRE( r.second->size() == 1);
+            REQUIRE( r.second->peek() == 'b' );
         }
     }
     GIVEN( "number" ) {
@@ -44,7 +44,7 @@ SCENARIO( "Fundamental parsers", "[parser]" ) {
             const auto r {run_parser(number, "5")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == '5' );
-            REQUIRE( r.second.at_end() == true );
+            REQUIRE( r.second->at_end() == true );
         }
     }
     GIVEN( "const_string" ) {
@@ -71,7 +71,7 @@ SCENARIO( "Fundamental parsers", "[parser]" ) {
             const auto r {run_parser(p, s)};
             REQUIRE( r.first );
             REQUIRE( r.first == "abcdef"s );
-            REQUIRE( r.second.peek() == 'g' );
+            REQUIRE( r.second->peek() == 'g' );
         }
     }
 }
@@ -83,15 +83,15 @@ SCENARIO( "many parser combinations", "[parser]" ) {
             const auto r {run_parser(p, "aaa")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == ""s );
-            REQUIRE( r.second.size() == 3 );
+            REQUIRE( r.second->size() == 3 );
         }
         WHEN( "given bba" ) {
             const std::string s {"bba"};
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == "bb"s );
-            REQUIRE( r.second.size() == 1 );
-            REQUIRE( r.second.peek() == 'a' );
+            REQUIRE( r.second->size() == 1 );
+            REQUIRE( r.second->peek() == 'a' );
         }
     }
     GIVEN( "many oneOf 'b'" ) {
@@ -100,15 +100,15 @@ SCENARIO( "many parser combinations", "[parser]" ) {
             const auto r {run_parser(p, "aaa")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == ""s );
-            REQUIRE( r.second.size() == 3 );
+            REQUIRE( r.second->size() == 3 );
         }
         WHEN( "given bba" ) {
             const std::string s {"bba"};
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == "bb"s );
-            REQUIRE( r.second.size() == 1 );
-            REQUIRE( r.second.peek() == 'a' );
+            REQUIRE( r.second->size() == 1 );
+            REQUIRE( r.second->peek() == 'a' );
         }
     }
 }
@@ -126,7 +126,7 @@ SCENARIO( "manyV parser combinations" ) {
             const auto r {run_parser(p, "abc")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == vect_t{'a', 'b', 'c'});
-            REQUIRE( r.second.at_end() );
+            REQUIRE( r.second->at_end() );
         }
     }
     GIVEN( "manyV integer parser" ) {
@@ -142,7 +142,7 @@ SCENARIO( "manyV parser combinations" ) {
             const auto r {run_parser(p, "123")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == vect_t{123} );
-            REQUIRE( r.second.at_end() );
+            REQUIRE( r.second->at_end() );
         }
     }
     GIVEN( "manyV token integer parser" ) {
@@ -157,27 +157,27 @@ SCENARIO( "manyV parser combinations" ) {
             const auto r {run_parser(p, "123")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == vect_t{123} );
-            REQUIRE( r.second.at_end() );
+            REQUIRE( r.second->at_end() );
         }
         WHEN( "given string \"1 2 3 \"" ) {
             const auto r {run_parser(p, "1 2 3 ")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == vect_t{1, 2, 3} );
-            REQUIRE( r.second.at_end() );
+            REQUIRE( r.second->at_end() );
         }
         WHEN( "given string \"1 2 3\"" ) {
             const auto r {run_parser(p, "1 2 3")};
             REQUIRE( !!r.first );
             REQUIRE( r.first == vect_t{1, 2, 3} );
-            REQUIRE( r.second.at_end() );
+            REQUIRE( r.second->at_end() );
         }
         WHEN( "given string \"1 2 3ABC\"" ) {
             const std::string s {"1 2 3ABC"};
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == vect_t{1, 2, 3} );
-            REQUIRE_FALSE( r.second.at_end() );
-            REQUIRE( r.second.peek() == 'A' );
+            REQUIRE_FALSE( r.second->at_end() );
+            REQUIRE( r.second->peek() == 'A' );
         }
     }
 }
@@ -191,25 +191,25 @@ SCENARIO( "int parser", "[parser]" ) {
         const auto r {run_parser(base_integer(10), "1")};
         REQUIRE( !!r.first );
         REQUIRE( r.first == 1 );
-        REQUIRE( r.second.size() == 0 );
+        REQUIRE( r.second->size() == 0 );
     }
     GIVEN( "string '1 '" ) {
         const auto r {run_parser(base_integer(10), "1 ")};
         REQUIRE( !!r.first );
         REQUIRE( r.first == 1 );
-        REQUIRE( r.second.size() == 1 );
+        REQUIRE( r.second->size() == 1 );
     }
     GIVEN( "string '123'" ) {
         const auto r {run_parser(base_integer(10), "123")};
         REQUIRE( !!r.first );
         REQUIRE( r.first == 123 );
-        REQUIRE( r.second.size() == 0 );
+        REQUIRE( r.second->size() == 0 );
     }
     GIVEN( "string '123' but only parsing first 2 digits" ) {
         const auto r {run_parser(base_integer(10, 2), "123")};
         REQUIRE( !!r.first );
         REQUIRE( r.first == 12 );
-        REQUIRE( r.second.size() == 1 );
+        REQUIRE( r.second->size() == 1 );
     }
 }
 
@@ -226,8 +226,8 @@ SCENARIO( "auto int parser", "[parser]" ) {
         const std::string s {"0 "};
         const auto r {run_parser(integer, s)};
         REQUIRE( r.first == 0 );
-        REQUIRE( r.second.size() == 1 );
-        REQUIRE( r.second.peek() == ' ' );
+        REQUIRE( r.second->size() == 1 );
+        REQUIRE( r.second->peek() == ' ' );
     }
     GIVEN( "string '1'" ) {
         const auto r {run_parser(integer, "1")};
@@ -272,7 +272,7 @@ SCENARIO( "prefix/postfix parser", "[parser]" ) {
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == 'a' );
-            REQUIRE( r.second.peek() == 'b' );
+            REQUIRE( r.second->peek() == 'b' );
         }
     }
     GIVEN( "postfix parser" ) {
@@ -290,7 +290,7 @@ SCENARIO( "prefix/postfix parser", "[parser]" ) {
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == 'a' );
-            REQUIRE( r.second.peek() == 'b' );
+            REQUIRE( r.second->peek() == 'b' );
         }
     }
     GIVEN( "clasped parser" ) {
@@ -308,7 +308,7 @@ SCENARIO( "prefix/postfix parser", "[parser]" ) {
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == 123 );
-            REQUIRE( r.second.peek() == 'x' );
+            REQUIRE( r.second->peek() == 'x' );
         }
     }
 }
@@ -416,7 +416,7 @@ SCENARIO( "choice parsers", "[parser]" ) {
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == 'A' );
-            REQUIRE( r.second.peek() == ' ' );
+            REQUIRE( r.second->peek() == ' ' );
         }
         WHEN( "given B" ) {
             const auto r {run_parser(p, "B")};
@@ -432,7 +432,7 @@ SCENARIO( "choice parsers", "[parser]" ) {
             const auto r {run_parser(p, s)};
             REQUIRE( !!r.first );
             REQUIRE( r.first == '5' );
-            REQUIRE( r.second.peek() == ' ' );
+            REQUIRE( r.second->peek() == ' ' );
         }
     }
 
