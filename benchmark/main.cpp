@@ -8,9 +8,10 @@
 
 BENCHMARK_MAIN()
 
-using namespace apl;
-
 constexpr size_t max_range {10000000};
+#define BENCH_COMPLX(x) BENCHMARK(x)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN)
+
+using namespace apl;
 
 std::string self_concat(const char *s, size_t times) {
     std::ostringstream ss;
@@ -30,7 +31,7 @@ static void measure_word_parsing(benchmark::State &state) {
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(measure_word_parsing)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
+BENCH_COMPLX(measure_word_parsing);
 
 static void measure_vector_filling(benchmark::State &state) {
     const size_t size {static_cast<size_t>(state.range(0))};
@@ -45,7 +46,7 @@ static void measure_vector_filling(benchmark::State &state) {
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(measure_vector_filling)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
+BENCH_COMPLX(measure_vector_filling);
 
 static auto csv_line(size_t reserve_items = 0) {
     return [reserve_items] (str_pos pos) {
@@ -68,7 +69,7 @@ static void csv_vector_of_ints(benchmark::State &state) {
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(csv_vector_of_ints)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
+BENCH_COMPLX(csv_vector_of_ints);
 
 static void sum_of_ints(benchmark::State &state) {
     const size_t size {static_cast<size_t>(state.range(0))};
@@ -83,7 +84,7 @@ static void sum_of_ints(benchmark::State &state) {
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(sum_of_ints)->RangeMultiplier(10)->Range(10, max_range);
+BENCH_COMPLX(sum_of_ints);
 
 static void product_of_ints(benchmark::State &state) {
     const size_t size {static_cast<size_t>(state.range(0))};
@@ -98,4 +99,4 @@ static void product_of_ints(benchmark::State &state) {
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(product_of_ints)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN);;
+BENCH_COMPLX(product_of_ints);
