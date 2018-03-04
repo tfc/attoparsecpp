@@ -205,6 +205,12 @@ SCENARIO( "int parser", "[parser]" ) {
         REQUIRE( r.first == 123 );
         REQUIRE( r.second.size() == 0 );
     }
+    GIVEN( "string '123' but only parsing first 2 digits" ) {
+        const auto r {run_parser(base_integer(10, 2), "123")};
+        REQUIRE( !!r.first );
+        REQUIRE( r.first == 12 );
+        REQUIRE( r.second.size() == 1 );
+    }
 }
 
 SCENARIO( "auto int parser", "[parser]" ) {
