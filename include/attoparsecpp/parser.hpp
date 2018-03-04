@@ -358,6 +358,17 @@ static auto choice(Parsers ... ps)
     };
 }
 
+template <typename P, typename F>
+static auto map(P p, F f) {
+    return [p, f] (str_pos &pos) -> parser<typename std::result_of<F(parser_payload_type<P>)>::type> {
+        if (auto ret {p(pos)}) {
+            return {f(*ret)};
+        }
+        return {};
+    };
+}
+
+
 template <typename Parser>
 static auto run_parser(Parser &&p, const std::string &s)
     -> std::pair<parser_ret<Parser>, str_pos>
