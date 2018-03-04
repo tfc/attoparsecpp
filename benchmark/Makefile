@@ -1,6 +1,6 @@
 default: main
 
-CXXFLAGS=-O2 -std=c++14 -I../include
+CXXFLAGS=-O2 -std=c++14 -I../include -flto -fdevirtualize
 LDFLAGS=-lbenchmark -lpthread
 
 main: main.cpp
