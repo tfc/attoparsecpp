@@ -1,8 +1,8 @@
 #include <cassert>
 #include <sstream>
 
-#include <parser.hpp>
-#include <math_expression.hpp>
+#include <attoparsecpp/parser.hpp>
+#include <attoparsecpp/math_expression.hpp>
 
 #include <benchmark/benchmark.h>
 
