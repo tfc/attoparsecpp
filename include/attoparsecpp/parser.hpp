@@ -41,19 +41,9 @@ struct str_pos : public buffer_pos {
 
     str_pos(const std::string &s) : it{s.cbegin()}, end_it{s.cend()} {}
 
-    std::optional<char> peek() {
-        if (!at_end()) { return {*it}; }
-        return {};
-    }
-
     virtual char operator*() const override { return *it; }
 
-    virtual buffer_pos& operator++() override { return next(); }
-
-    str_pos& next() {
-        ++it;
-        return *this;
-    }
+    virtual buffer_pos& operator++() override { ++it; return *this; }
 
     size_t size() const { return end_it - it; }
 
