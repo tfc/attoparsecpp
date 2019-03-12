@@ -1,6 +1,6 @@
 {
     pkgs   ? import <nixpkgs> {},
-    stdenv ? pkgs.stdenv
+    stdenv ? pkgs.gccStdenv
 }:
 rec {
   myProject = stdenv.mkDerivation {

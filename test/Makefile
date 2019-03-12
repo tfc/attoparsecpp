@@ -1,7 +1,7 @@
 default: .depend main
 
-CXXFLAGS=-g -fsanitize=address -fsanitize=undefined -std=c++14 -I../include -Wfatal-errors
-LDFLAGS=-lasan -lubsan
+CXXFLAGS=-g -std=c++14 -I../include -Wfatal-errors
+LDFLAGS=
 
 SRC = main.cpp math_expression.cpp test.cpp gdb.cpp
 OBJ := $(SRC:%.cpp=%.o)

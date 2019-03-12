@@ -16,26 +16,46 @@
 
 namespace apl {
 
-static parser<int(*)(int, int)> add_op(str_pos &p)
-{
-    if (p.at_end()) { return {}; }
+template <typename T>
+static auto pure(T ret) {
+  return [ret] (str_pos &) -> parser<T> {
+    return {ret};
+  };
+}
 
-    switch (*p) {
-    case '+': p.next(); return {[](int a, int b) { return a + b; }};
-    case '-': p.next(); return {[](int a, int b) { return a - b; }};
-    default: return {};
-    }
+using namespace operators;
+int foofoo(int, int) { return 123; }
+
+/*
+template <typename T> class debug_t;
+
+
+static auto foo(str_pos &p) {
+
+debug_t<decltype(
+  (
+      ('+'_charP >> pure(foofoo))
+    | ('+'_charP >> pure(foofoo))
+
+  )(p)
+)> d;
+
+}
+*/
+
+static parser<int(*)(int, int)> add_op(str_pos &p) {
+  return (
+      ('+'_charP >> pure([](int a, int b) -> int { return a + b; }))
+    | ('-'_charP >> pure([](int a, int b) -> int { return a - b; }))
+  )(p);
 }
 
 static parser<int(*)(int, int)> mul_op(str_pos &p)
 {
-    if (p.at_end()) { return {}; }
-
-    switch (*p) {
-    case '*': p.next(); return {[](int a, int b) { return a * b; }};
-    case '/': p.next(); return {[](int a, int b) { return a / b; }};
-    default: return {};
-    }
+  return (
+      ('*'_charP >> pure(foofoo))
+    | ('/'_charP >> pure(foofoo))
+  )(p);
 }
 
 static parser<int> expr(  str_pos &p);

@@ -338,23 +338,27 @@ static auto clasped(Parser1 open_parser, Parser2 close_parser, Parser3 parser)
 }
 
 namespace detail {
-template <typename Parser>
-static parser_ret<Parser> apply_parser_choice(str_pos &pos, Parser p) {
+template <typename T> class type2type { using type = T; };
+
+template <typename Parser, typename R>
+static R apply_parser_choice(type2type<R>, str_pos &pos, Parser p) {
     return p(pos);
 }
 
-template <typename Parser, typename ...Parsers>
-static parser_ret<Parser> apply_parser_choice(str_pos &pos, Parser p, Parsers ... ps) {
+template <typename Parser, typename ...Parsers, typename R>
+static R apply_parser_choice(type2type<R>, str_pos &pos, Parser p, Parsers ... ps) {
     if (auto ret {p(pos)}) { return ret; }
-    return apply_parser_choice(pos, ps...);
+    return apply_parser_choice(type2type<R>{}, pos, ps...);
 }
 }
 
 template <typename ...Parsers>
 static auto choice(Parsers ... ps)
 {
+  using P = typename std::tuple_element<0, std::tuple<Parsers...>>::type;
+  using R = parser_ret<P>;
     return [ps...] (str_pos &pos) {
-        return detail::apply_parser_choice(pos, ps...);
+        return detail::apply_parser_choice(detail::type2type<R>{}, pos, ps...);
     };
 }
 
@@ -383,6 +387,19 @@ static auto parse_result(Parser &&p, const std::string &s)
 {
     str_pos pos {s};
     return p(pos);
+}
+
+namespace operators {
+template <typename P1, typename P2>
+static auto operator|(P1 p1, P2 p2) { return choice(p1, p2); }
+
+template <typename P1, typename P2>
+static auto operator>>(P1 p1, P2 p2) { return prefixed(p1, p2); }
+
+template <typename P1, typename P2>
+static auto operator<<(P1 p1, P2 p2) { return postfixed(p2, p1); }
+
+static auto operator"" _charP (char c) { return oneOf(c); }
 }
 
 }
