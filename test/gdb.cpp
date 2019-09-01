@@ -2,7 +2,6 @@
 
 #include <catch2/catch.hpp>
 
-#include <optional>
 #include <numeric>
 
 using namespace apl;

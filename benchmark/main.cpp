@@ -72,7 +72,7 @@ static void csv_vector_of_ints(benchmark::State &state) {
 BENCH_COMPLX(csv_vector_of_ints);
 
 static void sum_of_ints(benchmark::State &state) {
-    const size_t size {static_cast<size_t>(state.range(0))};
+    const int size{static_cast<int>(state.range(0))};
     assert(size > 0);
     const std::string s {std::string{"1 "} + self_concat("+ 1", size - 1)};
 

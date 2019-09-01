@@ -23,38 +23,26 @@ static auto pure(T ret) {
   };
 }
 
-using namespace operators;
-int foofoo(int, int) { return 123; }
 
-/*
-template <typename T> class debug_t;
-
-
-static auto foo(str_pos &p) {
-
-debug_t<decltype(
-  (
-      ('+'_charP >> pure(foofoo))
-    | ('+'_charP >> pure(foofoo))
-
-  )(p)
-)> d;
-
-}
-*/
+inline int plus_op(    int a, int b) { return a + b; }
+inline int minus_op(   int a, int b) { return a - b; }
+inline int multiply_op(int a, int b) { return a * b; }
+inline int divide_op(  int a, int b) { return a / b; }
 
 static auto add_op(str_pos &p) {
+  using namespace operators;
   return (
-      ('+'_charP >> pure([](int a, int b) -> int { return a + b; }))
-    | ('-'_charP >> pure([](int a, int b) -> int { return a - b; }))
+      ('+'_charP >> pure(plus_op))
+    | ('-'_charP >> pure(minus_op))
   )(p);
 }
 
 static auto mul_op(str_pos &p)
 {
+  using namespace operators;
   return (
-      ('*'_charP >> pure(foofoo))
-    | ('/'_charP >> pure(foofoo))
+      ('*'_charP >> pure(multiply_op))
+    | ('/'_charP >> pure(divide_op))
   )(p);
 }
 
@@ -74,4 +62,4 @@ static parser<int> factor(str_pos &p) {
     return choice(base_integer(10), clasped(oneOf('('), oneOf(')'), expr))(p);
 }
 
-}
+} // namespace apl
