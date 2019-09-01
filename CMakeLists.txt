@@ -8,8 +8,14 @@ target_include_directories(${PROJECT_NAME} INTERFACE
   )
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
+find_package(Catch2 REQUIRED)
+find_package(benchmark REQUIRED)
+include(CTest)
+include(Catch)
+
 enable_testing()
 add_subdirectory(test)
+add_subdirectory(benchmark)
 
 
 

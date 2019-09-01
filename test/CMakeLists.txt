@@ -6,6 +6,6 @@ add_executable(${PROJECT_NAME}-test
   )
 target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 target_compile_options(${PROJECT_NAME}-test PRIVATE -Wall -Wextra -Werror)
+target_link_libraries(${PROJECT_NAME}-test Catch2::Catch2)
 
-add_test(NAME ${PROJECT_NAME}-test COMMAND ${PROJECT_NAME}-test)
-
+catch_discover_tests(${PROJECT_NAME}-test)
