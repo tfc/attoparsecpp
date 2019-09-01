@@ -1,26 +1,13 @@
 {
-    pkgs   ? import <nixpkgs> {},
-    stdenv ? pkgs.gccStdenv
+  nixpkgs ? <nixpkgs>,
+  pkgs ? import nixpkgs {}
 }:
-rec {
-  myProject = stdenv.mkDerivation {
-    name = "attoparsecpp";
-    version = "0.1";
+let
+  myStdenv = with pkgs; overrideCC stdenv gcc9;
+in myStdenv.mkDerivation {
+  name = "attoparsecpp";
+  buildInputs = with pkgs; [ catch2 gbenchmark ];
+  nativeBuildInputs = with pkgs; [ cmake ];
 
-    src = ./.;
-    checkPhase = ''
-      make -C test check
-      make -C benchmark check
-    '';
-
-    installPhase = ''
-      mkdir -p $out/include
-      cp -r include/attoparsecpp $out/include/
-    '';
-
-    buildInputs = with pkgs; [
-      (callPackage ./catch.nix { })
-      (callPackage ./googlebench.nix { stdenv = stdenv; })
-    ];
-  };
+  src = ./.;
 }
