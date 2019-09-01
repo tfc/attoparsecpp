@@ -43,14 +43,14 @@ debug_t<decltype(
 }
 */
 
-static parser<int(*)(int, int)> add_op(str_pos &p) {
+static auto add_op(str_pos &p) {
   return (
       ('+'_charP >> pure([](int a, int b) -> int { return a + b; }))
     | ('-'_charP >> pure([](int a, int b) -> int { return a - b; }))
   )(p);
 }
 
-static parser<int(*)(int, int)> mul_op(str_pos &p)
+static auto mul_op(str_pos &p)
 {
   return (
       ('*'_charP >> pure(foofoo))

@@ -399,7 +399,7 @@ static auto operator>>(P1 p1, P2 p2) { return prefixed(p1, p2); }
 template <typename P1, typename P2>
 static auto operator<<(P1 p1, P2 p2) { return postfixed(p2, p1); }
 
-static auto operator"" _charP (char c) { return oneOf(c); }
+inline auto operator"" _charP (char c) { return oneOf(c); }
 }
 
 }

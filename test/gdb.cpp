@@ -1,7 +1,9 @@
-#include <numeric>
 #include <attoparsecpp/parser.hpp>
 
-#include <catch/catch.hpp>
+#include <catch2/catch.hpp>
+
+#include <optional>
+#include <numeric>
 
 using namespace apl;
 using namespace std::string_literals;
@@ -40,5 +42,3 @@ SCENARIO( "gdb parser", "[gdb_parser]" ) {
         }
     }
 }
-
-

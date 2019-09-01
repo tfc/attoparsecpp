@@ -1,6 +1,6 @@
 #include <attoparsecpp/math_expression.hpp>
 
-#include <catch/catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace apl;
 
