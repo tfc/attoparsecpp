@@ -6,7 +6,7 @@
 
 #include <benchmark/benchmark.h>
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();
 
 constexpr size_t max_range {10000000};
 #define BENCH_COMPLX(x) BENCHMARK(x)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN)
