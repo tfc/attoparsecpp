@@ -1,5 +1,6 @@
 add_executable(${PROJECT_NAME}-test 
   gdb.cpp
+  ini.cpp
   main.cpp
   math_expression.cpp
   test.cpp
