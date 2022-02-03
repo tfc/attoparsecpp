@@ -6,9 +6,8 @@
 
 #include <benchmark/benchmark.h>
 
-BENCHMARK_MAIN()
 
-constexpr size_t max_range {10000000};
+static constexpr size_t max_range {10000000};
 #define BENCH_COMPLX(x) BENCHMARK(x)->RangeMultiplier(10)->Range(10, max_range)->Complexity(benchmark::oN)
 
 using namespace apl;
@@ -72,7 +71,7 @@ static void csv_vector_of_ints(benchmark::State &state) {
 BENCH_COMPLX(csv_vector_of_ints);
 
 static void sum_of_ints(benchmark::State &state) {
-    const size_t size {static_cast<size_t>(state.range(0))};
+    const auto size {static_cast<int>(state.range(0))};
     assert(size > 0);
     const std::string s {std::string{"1 "} + self_concat("+ 1", size - 1)};
 
@@ -100,3 +99,6 @@ static void product_of_ints(benchmark::State &state) {
 }
 
 BENCH_COMPLX(product_of_ints);
+
+
+BENCHMARK_MAIN();

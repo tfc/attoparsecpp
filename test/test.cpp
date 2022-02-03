@@ -5,7 +5,7 @@
 
 #include <attoparsecpp/parser.hpp>
 
-#include <catch/catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace apl;
 using namespace std::string_literals;

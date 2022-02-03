@@ -1,0 +1,26 @@
+{
+    "benchmark": {
+        "branch": "main",
+        "description": "A microbenchmark support library",
+        "homepage": "",
+        "owner": "google",
+        "repo": "benchmark",
+        "rev": "1ee7bee6c54bb2b9c5cd055e759cb1acec4bc4ec",
+        "sha256": "1xj8fk95h415yd71fm5n9p38dshvv80cdqq9fqwqkk2g1vyqa1m4",
+        "type": "tarball",
+        "url": "https://github.com/google/benchmark/archive/1ee7bee6c54bb2b9c5cd055e759cb1acec4bc4ec.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "nixpkgs": {
+        "branch": "master",
+        "description": "Nix Packages collection",
+        "homepage": "",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6d85b1e03a525efe9163f31781beda1696d09003",
+        "sha256": "1i6f6sdayw2qmqbw39zqqfz17d5i71m7jqpmxmnknahgk2dnvwsw",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/6d85b1e03a525efe9163f31781beda1696d09003.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    }
+}

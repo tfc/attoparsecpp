@@ -1,15 +1,11 @@
 #pragma once
 
 #include <iterator>
-#include <experimental/optional>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
-
-namespace std {
-    using namespace std::experimental;
-}
 
 namespace apl {
 
@@ -314,7 +310,7 @@ static auto prefixed(Parser1 prefix_parser, Parser2 parser)
         if (auto ret1 {prefix_parser(pos)}) {
             return parser(pos);
         }
-        return {};
+        return parser_ret<Parser2>{};
     };
 }
 
