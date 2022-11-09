@@ -1,27 +1,29 @@
 { stdenv
 , catch2
-, googlebench
+, gbenchmark
 , cmake
 , lib
+, doCheck ? true
+, doBenchmark ? true
 }:
 
 stdenv.mkDerivation {
   name = "attoparsecpp";
 
-  src = lib.sourceByRegex ./.. [
-    "^include$"
-    "^include/attoparsecpp$"
-    "^test$"
-    "^benchmark$"
+  src = lib.sourceByRegex ./. [
+    "^include.*"
+    "^test.*"
+    "^benchmark.*"
     ".*CMakeLists\.txt$"
-    ".*\.hpp$"
-    ".*\.cpp$"
     "^pkg-config\.pc\.cmake$"
   ];
 
-  checkInputs = [ catch2 googlebench ];
-  doCheck = true;
-  postCheck = ''
+  checkInputs = [
+    gbenchmark
+    catch2
+  ];
+  inherit doCheck;
+  postCheck = lib.optionalString doBenchmark ''
     ./benchmark/attoparsecpp-benchmark
   '';
 
