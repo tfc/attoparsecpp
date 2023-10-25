@@ -1,5 +1,6 @@
+.ccls-cache
+.direnv
+.pre-commit-config.yaml
+build
 result
 result-*
-.pre-commit-config.yaml
-.ccls-cache
-build
