@@ -19,6 +19,17 @@
       packages.default = config.packages.attoparsec;
       packages.attoparsec = pkgs.callPackage ./build.nix { };
 
+      packages.coverage = config.packages.attoparsec.overrideAttrs (old: {
+        hardeningDisable = [ "all" ];
+        cmakeBuildType = "Coverage";
+        postCheck = ''
+          cmake --build . --target process_coverage
+        '';
+        installPhase = ''
+          cp -r coverage $out
+        '';
+      });
+
       checks = {
         gcc = config.packages.attoparsec.override { stdenv = pkgs.gccStdenv; };
         clang = config.packages.attoparsec.override { stdenv = pkgs.clangStdenv; };
