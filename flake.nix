@@ -35,9 +35,6 @@
           coverage
           ;
 
-        gcc = config.packages.attoparsec.override {
-          stdenv = pkgs.gccStdenv;
-        };
         clang = config.packages.attoparsec.override {
           stdenv = pkgs.clangStdenv;
         };
@@ -50,6 +47,10 @@
             nixpkgs-fmt.enable = true;
             statix.enable = true;
           };
+        };
+      } // pkgs.lib.optionalAttrs (!pkgs.hostPlatform.isDarwin) {
+        gcc = config.packages.attoparsec.override {
+          stdenv = pkgs.gccStdenv;
         };
       };
     };
