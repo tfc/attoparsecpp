@@ -27,9 +27,6 @@ stdenv.mkDerivation {
     gcovr
   ];
   inherit doCheck;
-  postCheck = lib.optionalString doBenchmark ''
-    ./benchmark/attoparsecpp-benchmark
-  '';
 
   enableParallelBuilding = true;
 
