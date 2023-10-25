@@ -46,7 +46,7 @@ template <typename T>
 using parser = std::optional<T>;
 
 template <typename Parser>
-using parser_ret = typename std::result_of<Parser(str_pos&)>::type;
+using parser_ret = std::invoke_result_t<Parser, str_pos&>;
 
 template <typename Parser>
 using parser_payload_type = typename parser_ret<Parser>::value_type;
