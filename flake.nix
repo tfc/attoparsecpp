@@ -46,9 +46,10 @@
         };
 
         clang = config.packages.attoparsec.override {
-          stdenv = pkgs.clangStdenv;
+          stdenv = pkgs.clang16Stdenv;
         };
-      } // (
+      } // pkgs.lib.optionalAttrs (!pkgs.hostPlatform.isDarwin) (
+        # Sanitizers turned out to be complicated on macOS for now.
         let
           sansStr = pkgs.lib.concatMapStringsSep " " (x: "-fsanitize=${x}");
           toSanitized = _: sans: config.packages.attoparsec.overrideAttrs (_: {
