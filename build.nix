@@ -7,7 +7,6 @@
 , lib
 , clang-tools
 , doCheck ? true
-, doBenchmark ? true
 }:
 
 stdenv.mkDerivation {

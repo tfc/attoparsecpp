@@ -9,7 +9,7 @@
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
     systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-    perSystem = { config, self', inputs', pkgs, system, ... }: {
+    perSystem = { config, pkgs, system, ... }: {
       devShells.default = pkgs.mkShell {
         inherit (config.checks.pre-commit-check) shellHook;
         inputsFrom = [ config.packages.attoparsec ];
@@ -19,7 +19,7 @@
       packages.default = config.packages.attoparsec;
       packages.attoparsec = pkgs.callPackage ./build.nix { };
 
-      packages.coverage = config.packages.attoparsec.overrideAttrs (old: {
+      packages.coverage = config.packages.attoparsec.overrideAttrs (_: {
         hardeningDisable = [ "all" ];
         cmakeBuildType = "Coverage";
         postCheck = ''
@@ -47,6 +47,7 @@
           hooks = {
             nixpkgs-fmt.enable = true;
             statix.enable = true;
+            deadnix.enable = true;
           };
         };
       };
