@@ -7,7 +7,10 @@ using namespace apl;
 using namespace std::string_literals;
 
 static uint8_t gdb_checksum(const std::string &s) {
-    return std::accumulate(std::begin(s), std::end(s), static_cast<uint8_t>(0));
+    auto add {[](uint8_t l, char r) {
+      return l + static_cast<uint8_t>(r);
+    }};
+    return std::accumulate(std::begin(s), std::end(s), static_cast<uint8_t>(0), add);
 }
 
 static parser<std::string> checksum_parser(str_pos &pos) {
