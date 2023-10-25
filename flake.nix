@@ -31,8 +31,12 @@
       });
 
       checks = {
-        gcc = config.packages.attoparsec.override { stdenv = pkgs.gccStdenv; };
-        clang = config.packages.attoparsec.override { stdenv = pkgs.clangStdenv; };
+        gcc = config.packages.attoparsec.override {
+          stdenv = pkgs.gccStdenv;
+        };
+        clang = config.packages.attoparsec.override {
+          stdenv = pkgs.clangStdenv;
+        };
 
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
