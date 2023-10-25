@@ -45,9 +45,10 @@
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
+            clang-format.enable = true;
+            deadnix.enable = true;
             nixpkgs-fmt.enable = true;
             statix.enable = true;
-            deadnix.enable = true;
           };
         };
       };
