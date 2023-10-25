@@ -7,42 +7,29 @@
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
   };
 
-  outputs =
-    { self
-    , flake-parts
-    , nixpkgs
-    , pre-commit-hooks
-    }:
-    flake-parts.lib.mkFlake { inherit self; } {
-      systems = [ "x86_64-linux" "aarch64-linux" ];
-      perSystem = { config, self', inputs', pkgs, system, ... }:
-        let
-          attoparsec = pkgs.callPackage ./build.nix { };
-        in
-        {
-          devShells.default = pkgs.mkShell {
-            shellHook = ''
-              ${config.checks.pre-commit-check.shellHook}
-            '';
-            nativeBuildInputs = with pkgs; [
-            ];
-            inputsFrom = [ attoparsec ];
-          };
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    perSystem = { config, self', inputs', pkgs, system, ... }: {
+      devShells.default = pkgs.mkShell {
+        inherit (config.checks.pre-commit-check) shellHook;
+        inputsFrom = [ config.packages.attoparsec ];
+      };
 
-          packages.default = attoparsec;
+      packages.default = config.packages.attoparsec;
+      packages.attoparsec = pkgs.callPackage ./build.nix { };
 
-          checks = {
-            gcc = attoparsec.override { stdenv = pkgs.gccStdenv; };
-            clang = attoparsec.override { stdenv = pkgs.clangStdenv; };
+      checks = {
+        gcc = config.packages.attoparsec.override { stdenv = pkgs.gccStdenv; };
+        clang = config.packages.attoparsec.override { stdenv = pkgs.clangStdenv; };
 
-            pre-commit-check = pre-commit-hooks.lib.${system}.run {
-              src = ./.;
-              hooks = {
-                nixpkgs-fmt.enable = true;
-                statix.enable = true;
-              };
-            };
+        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            nixpkgs-fmt.enable = true;
+            statix.enable = true;
           };
         };
+      };
     };
+  };
 }

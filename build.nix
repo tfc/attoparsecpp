@@ -3,6 +3,7 @@
 , gbenchmark
 , cmake
 , lib
+, clang-tools
 , doCheck ? true
 , doBenchmark ? true
 }:
@@ -29,5 +30,8 @@ stdenv.mkDerivation {
 
   enableParallelBuilding = true;
 
-  nativeBuildInputs = [ cmake ];
+  nativeBuildInputs = [
+    clang-tools
+    cmake
+  ];
 }
