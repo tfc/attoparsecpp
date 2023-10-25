@@ -24,8 +24,8 @@ static void measure_word_parsing(benchmark::State &state) {
     const std::string s {self_concat("a", size)};
 
     for (auto _ : state) {
-        auto r {parse_result(p, s)};
-        benchmark::DoNotOptimize(r->data());
+        auto r {parse_result(p, s)->data()};
+        benchmark::DoNotOptimize(r);
     }
     state.SetComplexityN(state.range(0));
 }
@@ -39,7 +39,8 @@ static void measure_vector_filling(benchmark::State &state) {
 
     for (auto _ : state) {
         auto r {parse_result(p, s)};
-        benchmark::DoNotOptimize(r->data());
+        auto res {r->data()};
+        benchmark::DoNotOptimize(res);
         assert(r->size() == size);
     }
     state.SetComplexityN(state.range(0));
@@ -62,7 +63,8 @@ static void csv_vector_of_ints(benchmark::State &state) {
 
     for (auto _ : state) {
         const auto r {parse_result(p, s)};
-        benchmark::DoNotOptimize(r->data());
+        auto res {r->data()};
+        benchmark::DoNotOptimize(res);
         assert(r->size() == size);
     }
     state.SetComplexityN(state.range(0));
@@ -77,8 +79,9 @@ static void sum_of_ints(benchmark::State &state) {
 
     for (auto _ : state) {
         const auto r {parse_result(expr, s)};
-        benchmark::DoNotOptimize(*r == size);
-        assert(*r == size);
+        bool res {*r == size};
+        benchmark::DoNotOptimize(res);
+        assert(res);
     }
     state.SetComplexityN(state.range(0));
 }
@@ -92,8 +95,9 @@ static void product_of_ints(benchmark::State &state) {
 
     for (auto _ : state) {
         const auto r {parse_result(expr, s)};
-        benchmark::DoNotOptimize(r == 1);
-        assert(r == 1);
+        bool res {r == 1};
+        benchmark::DoNotOptimize(res);
+        assert(res);
     }
     state.SetComplexityN(state.range(0));
 }
