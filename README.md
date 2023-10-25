@@ -77,25 +77,26 @@ You need to install the following libraries:
 - [googletest](https://github.com/google/googletest)
 - [google benchmark](https://github.com/google/benchmark)
 
-> In order to install them automatically, you can just run `nix-shell` in the project directory.
-> It will install all dependencies (see file [`default.nix`](./default.nix)) and put them in place.
+> In order to install them automatically, you can just run `nix develop` in the project directory.
+> It will install all dependencies and put them in place.
 >
-> `nix-shell` is part of the [Nix package manager](https://nixos.org/nix/) for Unix/Linux/Mac.
+> `nix develop` is part of the [Nix package manager](https://nixos.org/nix/) for Unix/Linux/Mac.
 
-### Tests
+### Build and Test
 
 ``` bash
-cd test
-make
-./main
+cmake -B build -S .
+cd build
+cmake --build .
+ctest
 ```
 
 ### Benchmrks
 
+After building, run:
+
 ``` bash
-cd benchmark
-make
-./main
+./benchmark/attoparsecpp-benchmark
 ```
 
 ## Performance
@@ -158,4 +159,3 @@ product_of_ints/10000000         176399736 ns  176310500 ns          4
 product_of_ints_BigO                 17.64 N      17.63 N
 product_of_ints_RMS                      0 %          0 %
 ```
-
