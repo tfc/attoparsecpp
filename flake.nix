@@ -13,6 +13,7 @@
       devShells.default = pkgs.mkShell {
         inherit (config.checks.pre-commit-check) shellHook;
         inputsFrom = [ config.packages.attoparsec ];
+        hardeningDisable = [ "all" ];
       };
 
       packages.default = config.packages.attoparsec;

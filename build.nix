@@ -1,6 +1,8 @@
 { stdenv
 , catch2
+, ninja
 , gbenchmark
+, gcovr
 , cmake
 , lib
 , clang-tools
@@ -22,6 +24,7 @@ stdenv.mkDerivation {
   checkInputs = [
     gbenchmark
     catch2
+    gcovr
   ];
   inherit doCheck;
   postCheck = lib.optionalString doBenchmark ''
@@ -33,5 +36,6 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     clang-tools
     cmake
+    ninja
   ];
 }
