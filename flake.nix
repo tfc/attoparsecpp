@@ -16,23 +16,42 @@
         hardeningDisable = [ "all" ];
       };
 
-      packages.default = config.packages.attoparsec;
-      packages.attoparsec = pkgs.callPackage ./build.nix { };
+      packages =
+        let
+          attoparsec = pkgs.callPackage ./build.nix { };
+        in
+        {
+          default = config.packages.attoparsec;
+          attoparsec =
+            if pkgs.stdenv.hostPlatform.isDarwin
+            then config.packages.attoparsec-clang
+            else config.packages.attoparsec-gcc;
 
-      packages.coverage = config.packages.attoparsec.overrideAttrs (_: {
-        hardeningDisable = [ "all" ];
-        cmakeBuildType = "Coverage";
-        postCheck = ''
-          cmake --build . --target process_coverage
-        '';
-        installPhase = ''
-          cp -r coverage $out
-        '';
-      });
+          attoparsec-gcc = attoparsec.override {
+            stdenv = pkgs.gcc13Stdenv;
+          };
+
+          attoparsec-clang = attoparsec.override {
+            stdenv = pkgs.clang16Stdenv;
+            clang-tools = pkgs.clang-tools_16;
+          };
+
+          coverage = config.packages.attoparsec.overrideAttrs (_: {
+            hardeningDisable = [ "all" ];
+            cmakeBuildType = "Coverage";
+            postCheck = ''
+              cmake --build . --target process_coverage
+            '';
+            installPhase = ''
+              cp -r coverage $out
+            '';
+          });
+        };
 
       checks = {
         inherit (config.packages)
           coverage
+          attoparsec-clang
           ;
 
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
@@ -43,10 +62,6 @@
             nixpkgs-fmt.enable = true;
             statix.enable = true;
           };
-        };
-
-        clang = config.packages.attoparsec.override {
-          stdenv = pkgs.clang16Stdenv;
         };
       } // pkgs.lib.optionalAttrs (!pkgs.hostPlatform.isDarwin) (
         # Sanitizers turned out to be complicated on macOS for now.
@@ -67,9 +82,7 @@
           sanitizer-leak = [ "leak" ];
         }
       ) // pkgs.lib.optionalAttrs (!pkgs.hostPlatform.isDarwin) {
-        gcc = config.packages.attoparsec.override {
-          stdenv = pkgs.gccStdenv;
-        };
+        inherit (config.packages) attoparsec-gcc;
       };
     };
   };
