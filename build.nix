@@ -3,6 +3,7 @@
 , ninja
 , gbenchmark
 , gcovr
+, llvm
 , cmake
 , lib
 , clang-tools
@@ -21,10 +22,11 @@ stdenv.mkDerivation {
   ];
 
   checkInputs = [
-    gbenchmark
     catch2
-    gcovr
-  ];
+    gbenchmark
+  ]
+  ++ lib.optional stdenv.cc.isClang llvm; # for llvm-cov
+
   inherit doCheck;
 
   enableParallelBuilding = true;
@@ -32,6 +34,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     clang-tools
     cmake
+    gcovr
     ninja
   ];
 }
