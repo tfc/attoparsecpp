@@ -35,10 +35,6 @@
           coverage
           ;
 
-        clang = config.packages.attoparsec.override {
-          stdenv = pkgs.clangStdenv;
-        };
-
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
@@ -48,7 +44,28 @@
             statix.enable = true;
           };
         };
-      } // pkgs.lib.optionalAttrs (!pkgs.hostPlatform.isDarwin) {
+
+        clang = config.packages.attoparsec.override {
+          stdenv = pkgs.clangStdenv;
+        };
+      } // (
+        let
+          sansStr = pkgs.lib.concatMapStringsSep " " (x: "-fsanitize=${x}");
+          toSanitized = _: sans: config.packages.attoparsec.overrideAttrs (_: {
+            hardeningDisable = [ "all" ];
+            cmakeBuildType = "Debug";
+            preConfigure = ''
+              cmakeFlagsArray+=(
+                "-DCMAKE_CXX_FLAGS='-fsanitize=undefined ${sansStr sans}'"
+              )
+            '';
+          });
+        in
+        builtins.mapAttrs toSanitized {
+          sanitizer-ub-address = [ "undefined" "address" ];
+          sanitizer-leak = [ "leak" ];
+        }
+      ) // pkgs.lib.optionalAttrs (!pkgs.hostPlatform.isDarwin) {
         gcc = config.packages.attoparsec.override {
           stdenv = pkgs.gccStdenv;
         };
