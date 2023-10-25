@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.21)
 project(attoparsecpp CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  find_program(CLANG_TIDY_EXECUTABLE clang-tidy REQUIRED)
+  set(CMAKE_CXX_CLANG_TIDY
+    ${CLANG_TIDY_EXECUTABLE} -p ${CMAKE_BINARY_DIR})
+endif()
+
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
@@ -11,6 +19,7 @@ target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 enable_testing()
 add_subdirectory(test)
 add_subdirectory(benchmark)
+
 
 set(CPACK_PACKAGE_NAME "attoparsecpp")
 set(CPACK_PACKAGE_VENDOR "galowicz.de")

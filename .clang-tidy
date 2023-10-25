@@ -1,0 +1,7 @@
+Checks: >
+  -*,
+  bugprone-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-macro-usage,
+  clang-analyzer-core.*,
+  clang-analyzer-cplusplus.*
