@@ -31,6 +31,10 @@
       });
 
       checks = {
+        inherit (config.packages)
+          coverage
+          ;
+
         gcc = config.packages.attoparsec.override {
           stdenv = pkgs.gccStdenv;
         };
