@@ -1,12 +1,12 @@
 { stdenv
+, lib
 , catch2
-, ninja
+, clang-tools
+, cmake
 , gbenchmark
 , gcovr
 , llvm
-, cmake
-, lib
-, clang-tools
+, ninja
 , doCheck ? true
 }:
 
