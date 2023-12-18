@@ -32,8 +32,6 @@ stdenv.mkDerivation {
 
   inherit doCheck;
 
-  enableParallelBuilding = true;
-
   nativeBuildInputs = [
     clang-tools
     cmake
