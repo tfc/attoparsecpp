@@ -13,13 +13,16 @@
 stdenv.mkDerivation {
   name = "attoparsecpp";
 
-  src = lib.sourceByRegex ./. [
-    "^include.*"
-    "^test.*"
-    "^benchmark.*"
-    ".*CMakeLists\.txt$"
-    "^pkg-config\.pc\.cmake$"
-  ];
+  src = lib.fileset.toSource {
+    root = ./.;
+    fileset = lib.fileset.unions [
+      ./include
+      ./test
+      ./benchmark
+      ./CMakeLists.txt
+      ./pkg-config.pc.cmake
+    ];
+  };
 
   checkInputs = [
     catch2
