@@ -1,6 +1,6 @@
 { stdenv
 , lib
-, catch2
+, catch2_3
 , clang-tools
 , cmake
 , gbenchmark
@@ -25,7 +25,7 @@ stdenv.mkDerivation {
   };
 
   checkInputs = [
-    catch2
+    catch2_3
     gbenchmark
   ]
   ++ lib.optional stdenv.cc.isClang llvm; # for llvm-cov
