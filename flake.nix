@@ -3,7 +3,7 @@
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
   };
 
@@ -21,20 +21,12 @@
           attoparsec = pkgs.callPackage ./build.nix { };
         in
         {
+          inherit attoparsec;
+
           default = config.packages.attoparsec;
-          attoparsec =
-            if pkgs.stdenv.hostPlatform.isDarwin
-            then config.packages.attoparsec-clang
-            else config.packages.attoparsec-gcc;
 
-          attoparsec-gcc = attoparsec.override {
-            stdenv = pkgs.gcc13Stdenv;
-          };
-
-          attoparsec-clang = attoparsec.override {
-            stdenv = pkgs.clang16Stdenv;
-            clang-tools = pkgs.clang-tools_16;
-          };
+          attoparsec-clang = attoparsec.override { stdenv = pkgs.clangStdenv; };
+          attoparsec-gcc = attoparsec.override { stdenv = pkgs.gccStdenv; };
 
           coverage = config.packages.attoparsec.overrideAttrs (_: {
             hardeningDisable = [ "all" ];
@@ -52,6 +44,7 @@
         inherit (config.packages)
           coverage
           attoparsec-clang
+          attoparsec-gcc
           ;
 
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
