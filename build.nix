@@ -7,6 +7,7 @@
 , gcovr
 , llvm
 , ninja
+, gtest
 , doCheck ? true
 }:
 
@@ -27,6 +28,7 @@ stdenv.mkDerivation {
   checkInputs = [
     catch2_3
     gbenchmark
+    gtest
   ]
   ++ lib.optional stdenv.cc.isClang llvm; # for llvm-cov
 

@@ -18,6 +18,7 @@ target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
 enable_testing()
 add_subdirectory(test)
+add_subdirectory(gtest)
 add_subdirectory(benchmark)
 
 
