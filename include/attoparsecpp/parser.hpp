@@ -382,8 +382,8 @@ static auto run_parser(Parser &&p, const std::string &s)
 }
 
 template <typename Parser>
-static auto parse_result(Parser &&p, const std::string &s)
-    -> parser_ret<Parser> {
+static auto parse_result(Parser &&p,
+                         const std::string &s) -> parser_ret<Parser> {
   str_pos pos{s};
   return p(pos);
 }
