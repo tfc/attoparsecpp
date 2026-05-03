@@ -17,11 +17,12 @@ stdenv.mkDerivation {
   src = lib.fileset.toSource {
     root = ./.;
     fileset = lib.fileset.unions [
-      ./include
-      ./test
-      ./benchmark
       ./CMakeLists.txt
+      ./benchmark
+      ./gtest
+      ./include
       ./pkg-config.pc.cmake
+      ./test
     ];
   };
 
